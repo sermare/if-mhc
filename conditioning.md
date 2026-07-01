@@ -1,2 +1,20 @@
-Here's the full table. Legend: ALIGN = in superposition frame · FIX = freeze backbone + identity, zero noise · FIX-bb = freeze backbone, allow sequence · FREE = noise + redesign (your exploration DOF) · BREATHE = don't design, don't pin — let backbone relax (this state is the crux for DRG).
-ElementPart ofGIG run (seed 6AM5)DRG run (seed 6AMU-bound)Why (from paper)β-sheet groove floorMHCALIGN + FIXALIGN + FIXInvariant frame; defines "in basin"A/B pockets (N-term anchor pockets)MHCFIXFIXp1/p2 anchoring shared in both registersArg65, α1 helixMHCFIXFIXDocking clamp with Tyr51β; unchanged bothα2 short arm His145–Val152 (esp. Lys146, Ala150, Val152)MHCFIXBREATHEMust be free to widen/relax for DRG; locking it (A150P) kills DRG, not GIGF-pocketMHCFIX (holds p10)FIX (holds p9)The register selector lives herep1–p2 (N-term anchor)peptideFIXFIXShared; A/B-pocket anchor in bothp2/p3 backbonepeptideFIXFIXQ30α H-bond target (p2/p3 GIG, p2/p4 DRG)p4peptideFREE (Gly core)FIX (Asp)Charged driver in DRG; part of the mechanismp5peptideFREE (up-residue)FIX (Arg)The driver — its 7 Å swing forces the shiftp6 (Gly)peptideFIXFIXThe one genuinely conserved positionp7peptideFREE (Ile)FIX (Leu)Buried; distorts α2 arm to prime the slip; L7A ablatesp8peptideFREEFREE (backbone drops)Non-anchor; core explorationp9peptideFREEFIX (Met = shifted F-pocket anchor)M9A ablates — required anchor in DRGp10 (C-term)peptideFIX (Val anchor)FIX Met + ALLOW groove extensionGIG: canonical anchor. DRG: suboptimal Met that pops out; M10V (better anchor) kills mode + raises Tm 12 °CQ30, CDR1αTCRFIXFIXOnly conserved TCR–peptide contactTyr51, CDR2βTCRFIXFIXDocking clamp ↔ Arg65-α1Phe100βTCRFIXFIXPeptide-center H-bond in bothAsp91α / Gly93αTCRFIXFIX-bb (rotamer free)Rotate to accommodate p4-Asp in DRGAsn33βTCRFIXFIX-bb (rotamer free)Rotates to clear shifted p10-MetGly101β / Thr102β, CDR3βTCRFIXFIXClash with p5-Arg drives the shift
+Q30-conditioned peptide-design campaign (Q30α / CDR1α)
+
+ Context
+                                                                                                                                                                                                                                                                                    Prior campaigns showed the noMHC ProteinMPNN model recovers the cognate peptide core only on
+   near-native backbones and never recovers the MHC anchors, and that no RFdiffusion conditioning
+   captured either epitope. This new campaign tests a single, mechanistically-motivated TCR contact
+   — the conserved Gln30 of CDR1α (chain D, residue 30 = GLN in both 6AM5 and 6AMU), the only
+ conserved TCR–peptide contact — as the organizing constraint, and asks whether the register-defining                                                                                                                                                                                             second Q30 contact (peptide p3 for GIG / p4 for DRG) can be driven while the shared
+ N-terminal anchor p2 is held.
+
+   Two reconciled framings from the clarifications:
+   - Track A (direct): design the peptide against the full MHC+TCR complex as fixed context
+   (Q30 present but not isolated), with the table's per-position FIX/FREE scheme, on the existing
+ native + relaxed backbones.
+ - Track B (Q30-hotspot): express "condition only on Q30" as an RFdiffusion partial-diffusion
+ hotspot (ppi.hotspot_res=[D30], sole hotspot) that re-diffuses the peptide toward the Q30
+   contact, then MPNN-designs the freed core with the anchor + register-contact positions held.
+
+   Model: noMHC proteinmpnn_nomhc for all sequence design (MHC stays in the PDB as context but the
+   MHC-blind model effectively down-weights it). Sampling temp 0.3.
