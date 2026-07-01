@@ -1,0 +1,8 @@
+# Only three things are tracked in this repo: README.md, inputs/, and the notebook.
+# Ignore everything else in the folder by default.
+*
+!.gitignore
+!README.md
+!nomhc_campaign_report.ipynb
+!inputs/
+!inputs/**
