@@ -31,6 +31,36 @@ Filenames retain their crystal prefix (`6AM5_*` = conditioned toward/around the 
 | `condition_fixall` … `condition_fix0` | motif-templating ladder (10→0 residues templated) | §3.5, Table 6 |
 | `condition_null0` | zero-hotspot, zero-template null baseline | §3.6 (still growing — see `jobs/run_null_baseline.sh`) |
 
+### Design counts by condition and structure
+
+| condition | 6AM5 (GIG) | 6AMU (DRG) | total |
+|---|---:|---:|---:|
+| `L4_expanded` | 148 | 82 | 230 |
+| `L5_max` | 111 | 87 | 198 |
+| `k18` | 140 | 46 | 186 |
+| `L3_nterm_t2` | 101 | 67 | 168 |
+| `L1_nterm` | 82 | 71 | 153 |
+| `L2_nterm_t1` | 75 | 46 | 121 |
+| `null0` | 32 | 31 | 63 |
+| `k24` | 26 | 26 | 52 |
+| `max` | 26 | 26 | 52 |
+| `tcr2` | 16 | 16 | 32 |
+| `mhc` | 14 | 16 | 30 |
+| `mhc_tcr2` | 14 | 12 | 26 |
+| `tcr1` | 12 | 12 | 24 |
+| `mhc_tcr1` | 12 | 10 | 22 |
+| `fixall` | 15 | 5 | 20 |
+| `fix2` | 5 | 5 | 10 |
+| `fix4` | 5 | 5 | 10 |
+| `fix6` | 5 | 5 | 10 |
+| `fix8` | 5 | 5 | 10 |
+| `fix0` | 5 | 5 | 10 |
+| `k14` | 1 | 0 | 1 |
+| **total** | **850** | **578** | **1,428** |
+
+`null0` will keep growing as `jobs/run_null_baseline.sh` continues (target 150/crystal); re-run
+the regeneration steps below and re-zip to pick up new designs.
+
 `condition_manifest.csv` (also tracked standalone, outside the zip) maps every file to its
 conditioning, source campaign, crystal, and scored Cα RMSD/anchor values from
 `py/score_denovo_designs.py`, so you don't need to unzip anything just to look up which design
