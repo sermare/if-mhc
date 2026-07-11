@@ -60,3 +60,24 @@ outputs/condition_*/
 outputs/allcond150/
 outputs/null_extra300/
 outputs/rfd_null/
+
+# Exception to the hard guard: the extended 300K/50ns native MD calibration run
+# (2ns equil + 50ns production, same protocol as the 370K extended run). Only
+# the water-stripped 1000-frame trajectory + topology (needed to redo our own
+# Ca-RMSD/occupancy scoring) and Tamarind's precomputed per-frame analysis
+# tables (RMSD/RMSF/Rg/cross-correlation, csv+parquet) are tracked -- not the
+# solvated traj_equil.xtc/traj_prod.xtc, checkpoint, prmtop/inpcrd, or PNGs.
+!outputs/tamarind/
+!outputs/tamarind/results/
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/topology_no_water.pdb
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/traj_prod_no_water_seg1.xtc
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/analysis/
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/analysis/*.csv
+!outputs/tamarind/results/ifmhc_6AM5_md_300K_ext/analysis/*.parquet
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/topology_no_water.pdb
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/traj_prod_no_water_seg1.xtc
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.csv
+!outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.parquet
