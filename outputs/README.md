@@ -61,6 +61,49 @@ Filenames retain their crystal prefix (`6AM5_*` = conditioned toward/around the 
 `null0` will keep growing as `jobs/run_null_baseline.sh` continues (target 150/crystal); re-run
 the regeneration steps below and re-zip to pick up new designs.
 
+### Current top-up campaign (`allcond150`, in progress — as of 2026-07-11)
+
+A separate fresh campaign (`jobs/submit_allcond150.sh`, outputs under `outputs/allcond150/`) is
+re-generating every condition toward an even **150 designs/crystal (300/condition)** with the same
+T=30 / `Complex_base` protocol. Counts below are the current on-disk state (interim — the campaign
+stalled at ~59% when its watchdog was preempted and is being resumed). Targets are 150 each.
+
+| condition | 6AM5 (GIG) | 6AMU (DRG) | total |
+|---|---:|---:|---:|
+| `k14` | 144 | 143 | 287 |
+| `k24` | 125 | 124 | 249 |
+| `max` | 126 | 117 | 243 |
+| `L2_nterm_t1` | 79 | 104 | 183 |
+| `mhc` | 91 | 85 | 176 |
+| `tcr1` | 84 | 83 | 167 |
+| `mhc_tcr1` | 72 | 86 | 158 |
+| `mhc_tcr2` | 80 | 76 | 156 |
+| `tcr2` | 79 | 69 | 148 |
+| `L1_nterm` | 69 | 79 | 148 |
+| `L3_nterm_t2` | 51 | 84 | 135 |
+| `k18` | 10 | 105 | 115 |
+| `fix8` | 55 | 54 | 109 |
+| `L5_max` | 41 | 63 | 104 |
+| `fix6` | 51 | 43 | 94 |
+| `fix0` | 41 | 41 | 82 |
+| `fix2` | 41 | 41 | 82 |
+| `fix4` | 40 | 41 | 81 |
+| `L4_expanded` | 3 | 70 | 73 |
+| `null0` | 41 | 41 | 82 |
+| `fixall` | 0 | 0 | 0 |
+| **total** | **1,392** | **1,480** | **2,872** |
+
+Plus a dedicated **+300 negative-control** campaign (`outputs/null_extra300/`, no hotspots / no
+template) at **174/300** so far. Two caveats on this interim set: `fixall` is **0/0** — its contig
+templates the entire peptide (`…C1-10`, zero de-novo residues), which RFdiffusion cannot diffuse
+(`ValueError: Invalid shape in axis 0`); it needs a de-novo tail before it can run. `k18`/`L4_expanded`
+6AM5 are far behind their 6AMU counterparts because the fleet drained mid-cell.
+
+These 3,046 designs are archived in **`allcond150_designs_by_condition.zip`** (Cα backbones only,
+regrouped into `condition_<name>/` folders exactly like the paper zip; `condition_null0/` holds both
+the `allcond150` and the `null_extra300` draws). Interim snapshot — will be refreshed once the
+campaign completes and `fixall` is fixed.
+
 `condition_manifest.csv` (also tracked standalone, outside the zip) maps every file to its
 conditioning, source campaign, crystal, and scored Cα RMSD/anchor values from
 `py/score_denovo_designs.py`, so you don't need to unzip anything just to look up which design

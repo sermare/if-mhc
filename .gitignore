@@ -46,6 +46,7 @@
 !outputs/
 !outputs/README.md
 !outputs/paper_designs_by_condition.zip
+!outputs/allcond150_designs_by_condition.zip
 !outputs/condition_manifest.csv
 
 # Hard guard: NEVER track uncompressed/raw structure files, even if the .zip is
