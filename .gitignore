@@ -81,3 +81,11 @@ outputs/rfd_null/
 !outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/
 !outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.csv
 !outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.parquet
+
+# corpus scoring table + this analysis's outputs -- small CSVs, not raw
+# structures, but needed to reproduce the 300K_ext vs 370K comparison.
+!outputs/denovo_scores/
+!outputs/denovo_scores/per_design.csv
+!outputs/native_md_rmsd/
+!outputs/native_md_rmsd/md_300K_extended_per_frame.csv
+!outputs/native_md_rmsd/denovo_classified_300Kext_vs_370K.csv
