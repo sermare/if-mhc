@@ -47,3 +47,15 @@
 !outputs/README.md
 !outputs/paper_designs_by_condition.zip
 !outputs/condition_manifest.csv
+
+# Hard guard: NEVER track uncompressed/raw structure files, even if the .zip is
+# unpacked in place or a broader whitelist is added later. Only the curated .zip
+# and the CSV manifest belong in git — not the loose backbones themselves.
+outputs/**/*.pdb
+outputs/**/*.cif
+outputs/**/*.trb
+outputs/**/*.npz
+outputs/condition_*/
+outputs/allcond150/
+outputs/null_extra300/
+outputs/rfd_null/
