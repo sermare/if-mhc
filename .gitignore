@@ -82,6 +82,21 @@ outputs/rfd_null/
 !outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.csv
 !outputs/tamarind/results/ifmhc_6AMU_md_300K_ext/analysis/*.parquet
 
+# Extended 370K/50ns native MD calibration run (Tamarind job IDs: lbv69=6AM5,
+# p1yv2=6AMU) -- same curation as the 300K_ext run above.
+!outputs/tamarind/results/lbv69/
+!outputs/tamarind/results/lbv69/topology_no_water.pdb
+!outputs/tamarind/results/lbv69/traj_prod_no_water_seg1.xtc
+!outputs/tamarind/results/lbv69/analysis/
+!outputs/tamarind/results/lbv69/analysis/*.csv
+!outputs/tamarind/results/lbv69/analysis/*.parquet
+!outputs/tamarind/results/p1yv2/
+!outputs/tamarind/results/p1yv2/topology_no_water.pdb
+!outputs/tamarind/results/p1yv2/traj_prod_no_water_seg1.xtc
+!outputs/tamarind/results/p1yv2/analysis/
+!outputs/tamarind/results/p1yv2/analysis/*.csv
+!outputs/tamarind/results/p1yv2/analysis/*.parquet
+
 # corpus scoring table + this analysis's outputs -- small CSVs, not raw
 # structures, but needed to reproduce the 300K_ext vs 370K comparison.
 !outputs/denovo_scores/
