@@ -7,25 +7,10 @@
 !MAIN_CLAIMS.md
 !ANALYSIS_WALKTHROUGH.md
 
-# analysis notebooks (top-level only — do not sweep in vendored
+# analysis notebooks (flat directory; do not sweep in vendored
 # RFdiffusion/ProteinMPNN example notebooks)
-!/00_native_register_components.ipynb
-!/01_md_calibrated_baseline.ipynb
-!/02_per_residue_register.ipynb
-!/03_q30_midpopulation_characterization.ipynb
-!/04_dataset_recovery_22structures.ipynb
-!/05_denovo_sampling_ramachandran.ipynb
-!/06_conditioning_correlation.ipynb
-!/07_contact_ladder_mpnn.ipynb
-!/08_recovery_consistency.ipynb
-!/09_q30_conditioning_arms.ipynb
-!/10_q30_intermediate_search.ipynb
-!/11_dmf5_cross_reactivity.ipynb
-!/12_nomhc_campaign_report.ipynb
-!/13_2p5e_mpnn_design_analysis.ipynb
-!/14_2p5e_campaign_comparison.ipynb
-!/15_2p5e_relax_ensemble_mpnn.ipynb
-!/16_claims_evaluation_final.ipynb
+!notebooks/
+!notebooks/*.ipynb
 
 # scripts (flat directory of .py files; exclude __pycache__)
 !py/
@@ -53,3 +38,12 @@
 !inputs/
 !inputs/focus_6am/
 !inputs/focus_6am/**
+
+# outputs: the ~50GB working directory is NOT tracked. The one exception is a
+# curated zip of just the final designed backbones used in the paper,
+# regrouped by conditioning cell instead of by launch campaign (see
+# outputs/README.md for what this is and how to regenerate it).
+!outputs/
+!outputs/README.md
+!outputs/paper_designs_by_condition.zip
+!outputs/condition_manifest.csv
