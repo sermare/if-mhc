@@ -1,9 +1,55 @@
-# Only three things are tracked in this repo: README.md, inputs/, and the notebook.
-# Ignore everything else in the folder by default.
+# Whitelist-style .gitignore: everything is ignored by default (huge generated
+# artifacts live under outputs/, RFdiffusion/, ProteinMPNN/, etc.), and only the
+# specific paths below are tracked.
 *
 !.gitignore
 !README.md
-!nomhc_campaign_report.ipynb
-!V3_Q30_report.pdf
+!MAIN_CLAIMS.md
+!ANALYSIS_WALKTHROUGH.md
+
+# analysis notebooks (top-level only — do not sweep in vendored
+# RFdiffusion/ProteinMPNN example notebooks)
+!/00_native_register_components.ipynb
+!/01_md_calibrated_baseline.ipynb
+!/02_per_residue_register.ipynb
+!/03_q30_midpopulation_characterization.ipynb
+!/04_dataset_recovery_22structures.ipynb
+!/05_denovo_sampling_ramachandran.ipynb
+!/06_conditioning_correlation.ipynb
+!/07_contact_ladder_mpnn.ipynb
+!/08_recovery_consistency.ipynb
+!/09_q30_conditioning_arms.ipynb
+!/10_q30_intermediate_search.ipynb
+!/11_dmf5_cross_reactivity.ipynb
+!/12_nomhc_campaign_report.ipynb
+!/13_2p5e_mpnn_design_analysis.ipynb
+!/14_2p5e_campaign_comparison.ipynb
+!/15_2p5e_relax_ensemble_mpnn.ipynb
+!/16_claims_evaluation_final.ipynb
+
+# scripts (flat directory of .py files; exclude __pycache__)
+!py/
+!py/*.py
+
+# RFdiffusion campaign job drivers (flat directory of .sh/.tsv)
+!jobs/
+!jobs/*
+
+# paper: LaTeX source + compiled PDF + required style files
+# (excludes paper.aux/paper.log build artifacts and the AAAI instructions doc)
+!paper/
+!paper/paper.tex
+!paper/paper.pdf
+!paper/aaai.sty
+!paper/aaai.bst
+!paper/fixbib.sty
+
+# figures (final renders + the scripts that build them)
+!figures/
+!figures/**
+
+# inputs: only the 6AM* crystal structures and RFdiffusion spec files used
+# throughout this analysis — not the larger unrelated datasets under inputs/
 !inputs/
-!inputs/**
+!inputs/focus_6am/
+!inputs/focus_6am/**
