@@ -18,7 +18,7 @@ targetChains = A,B,D,E ; binderLength 10,10 ; numDesigns 3.
 """
 import json, os, time, requests
 
-API_KEY = "REDACTED_TAMARIND_KEY"
+API_KEY = os.environ.get("TAMARIND_API_KEY", "")
 HEADERS = {"x-api-key": API_KEY}
 BASE = "https://app.tamarind.bio/api/"
 ROOT = "/home/ubuntu/if-mhc"

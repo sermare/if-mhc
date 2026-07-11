@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Poll our Tamarind jobs (MD pilot + 10 relax candidates) and download completed results."""
 import json, os, io, zipfile, sys, requests
-H={"x-api-key":"REDACTED_TAMARIND_KEY"}; B="https://app.tamarind.bio/api/"
+H={"x-api-key":os.environ.get("TAMARIND_API_KEY","")}; B="https://app.tamarind.bio/api/"
 OUT="outputs/tamarind"; RES=f"{OUT}/results"; os.makedirs(RES,exist_ok=True)
 TERMINAL={"Complete","Stopped","Failed","Error"}
 

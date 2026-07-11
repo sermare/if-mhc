@@ -5,7 +5,7 @@ Survivors (low-energy / conformation held) go to full openmm MD 10ns in stage 2.
 import json, os, re, glob, time, warnings, requests
 warnings.filterwarnings("ignore")
 from Bio.PDB import PDBParser, PDBIO
-API_KEY="REDACTED_TAMARIND_KEY"; H={"x-api-key":API_KEY}; B="https://app.tamarind.bio/api/"
+API_KEY=os.environ.get("TAMARIND_API_KEY",""); H={"x-api-key":API_KEY}; B="https://app.tamarind.bio/api/"
 OUT="outputs/tamarind"; FULL=f"{OUT}/cand_full"; os.makedirs(FULL,exist_ok=True)
 AA1to3={'A':'ALA','R':'ARG','N':'ASN','D':'ASP','C':'CYS','Q':'GLN','E':'GLU','G':'GLY','H':'HIS','I':'ILE','L':'LEU','K':'LYS','M':'MET','F':'PHE','P':'PRO','S':'SER','T':'THR','W':'TRP','Y':'TYR','V':'VAL'}
 _p=PDBParser(QUIET=True)

@@ -16,7 +16,7 @@ Cross-conditioning x2 (chase the OTHER peptide; same DMF5 TCR, residues transfer
   -> 2 jobs x 24 designs = 48        TOTAL = 300
 """
 import json, os, time, requests
-API_KEY="REDACTED_TAMARIND_KEY"; HEADERS={"x-api-key":API_KEY}
+API_KEY=os.environ.get("TAMARIND_API_KEY",""); HEADERS={"x-api-key":API_KEY}
 BASE="https://app.tamarind.bio/api/"; ROOT="/home/ubuntu/if-mhc"
 MHC="159 66 70 146"          # bracket: N-term anchor + C-term pocket restraint (both structures)
 EB={"lo":"95 96","mid":"97 98","hi":"99 100"}

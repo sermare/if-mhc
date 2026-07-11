@@ -11,7 +11,7 @@ best in our RFdiffusion contact ladder: N-term MHC anchors + MHC pocket + 3 TCR 
 """
 import json, os, time, requests
 
-API_KEY = "REDACTED_TAMARIND_KEY"
+API_KEY = os.environ.get("TAMARIND_API_KEY", "")
 HEADERS = {"x-api-key": API_KEY}
 BASE = "https://app.tamarind.bio/api/"
 ROOT = "/home/ubuntu/if-mhc"

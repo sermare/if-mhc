@@ -15,7 +15,7 @@ RMSD-to-other shrinkage. Hold prediction: low T = seated+locked; high T = crosse
 after/with ejection.
 """
 import json, os, time, requests, re
-KEY=re.search(r'API_KEY\s*=\s*"([^"]+)"',open("/home/ubuntu/if-mhc/py/submit_rfd3_groove.py").read()).group(1)
+KEY=os.environ.get("TAMARIND_API_KEY","")
 H={"x-api-key":KEY}; B="https://app.tamarind.bio/api/"; ROOT="/home/ubuntu/if-mhc"
 
 # L2/L4 hotspot sets (RFdiffusion comma-string format), per crystal (from outputs/ladder/run.log)

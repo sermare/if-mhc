@@ -4,7 +4,7 @@ to Tamarind at 300 K and 370 K (4 jobs, 10 ns production each). Tests whether MD
 the local basin and drifts toward the OTHER peptide conformation (DRG<->GIG gap = 2.4 A).
 Upload: PUT /api/upload/<name> (binary) -> reference pdbFile by name in submit-job."""
 import json, os, time, requests
-API_KEY="REDACTED_TAMARIND_KEY"
+API_KEY=os.environ.get("TAMARIND_API_KEY","")
 HEADERS={"x-api-key":API_KEY}
 BASE="https://app.tamarind.bio/api/"
 OUT="outputs/tamarind"; os.makedirs(OUT,exist_ok=True)
