@@ -119,3 +119,5 @@ outputs/rfd_null/
 !outputs/native_md_rmsd/
 !outputs/native_md_rmsd/md_300K_extended_per_frame.csv
 !outputs/native_md_rmsd/denovo_classified_300Kext_vs_370K.csv
+!outputs/native_md_rmsd/md_310K_6AM5_per_frame.csv
+!outputs/native_md_rmsd/md_310K_6AMU_per_frame.csv
