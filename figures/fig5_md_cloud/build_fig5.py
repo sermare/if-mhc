@@ -1,9 +1,9 @@
 from pymol import cmd, util
 
-NATIVE_DRG = "/home/ubuntu/if-mhc/outputs/aligned/6AMU_native_aligned.pdb"
-DESIGN_ALIGNED = "/home/ubuntu/if-mhc/outputs/aligned/6AM5_k18_44_aligned.pdb"
-CLOSEST_FRAME = "/home/ubuntu/if-mhc/outputs/aligned/closest_drg_frame_pep.pdb"
-OUT_DIR = "/home/ubuntu/if-mhc/figures/fig5_md_cloud"
+NATIVE_DRG = "/global/scratch/users/sergiomar10/if-mhc/outputs/aligned/6AMU_native_aligned.pdb"
+DESIGN_ALIGNED = "/global/scratch/users/sergiomar10/if-mhc/outputs/aligned/6AM5_L3_crossing_aligned.pdb"
+CLOSEST_FRAME = "/global/scratch/users/sergiomar10/if-mhc/outputs/aligned/closest_drg_frame_pep_310K.pdb"
+OUT_DIR = "/global/scratch/users/sergiomar10/if-mhc/figures/fig5_md_cloud"
 MHC_CHAIN, PEP_CHAIN = "A", "P"
 
 cmd.reinitialize()
@@ -93,8 +93,8 @@ def annotate_legend(png, entries):
 
 
 annotate_legend(png, [
-    ("swatch", (255, 0, 255), "closest crossing design"),
-    ("swatch", (255, 215, 0), "closest single MD frame (t=41.4ns)"),
+    ("swatch", (255, 0, 255), "crossing design (1.44A to DRG)"),
+    ("swatch", (255, 215, 0), "closest single MD frame (t=36.2ns, 310K)"),
     ("swatch", (255, 165, 0), "native DRG [faint]"),
     ("swatch", (230, 230, 230), "MHC groove [faint]"),
 ])
