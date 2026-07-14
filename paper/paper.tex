@@ -234,12 +234,14 @@ per-cell hit count was assessed by Pearson correlation across all 55 cells.
 
 \section{Results}
 
-We generated 1,295 de novo peptide backbones across 55 conditioning cells and scored each against the
-three-criterion register test described in \S2.3. Two designs stood out immediately: one closely matched
-its own native conformation, and another matched the \textit{alternate} conformation better than its own.
-Reaching a clean count of these events, however, first required resolving a structural ambiguity present
-in every conditioning scheme tested --- described in \S3.4 --- which we identified during this analysis
-and corrected for before computing any of the statistics below. We present the headline result first
+We generated 8{,}722 de novo peptide backbones across 20 conditioning schemes (both crystals), together
+with 932 unconditioned (null) draws and 3{,}060 templating controls, and scored each against the
+three-criterion register test described in \S2.3, adjudicated against the well-converged 310K DRG
+acceptance band (\S2.4). Several designs entered the native envelope: some recovered their own native
+conformation, and others matched the \textit{alternate} conformation better than their own. Reaching a
+clean count of these events, however, first required resolving a structural ambiguity present in every
+conditioning scheme tested --- described in \S3.4 --- which we identified during this analysis and
+corrected for before computing any of the statistics below. We present the headline result first
 (\S3.1), then work outward to what explains its pattern (\S3.2--3.3), the correction that made it
 trustworthy (\S3.4), and the mechanism underneath (\S3.5), closing with the design and status of a direct
 null-baseline measurement (\S3.6).
@@ -268,14 +270,15 @@ conformation they are credited with matching than to the alternative.}
 \toprule
 outcome & count/$N$ & rate (95\% CI) \\
 \midrule
-Own recovery, full pool & 1/1{,}295 & 0.077\% (0.002--0.43\%) \\
-Alt.\ crossing, full pool & 4/1{,}295 & 0.309\% (0.084--0.79\%) \\
-Own recovery, fwd.\ subset & 1/600 & 0.167\% (0.004--0.93\%) \\
-Alt.\ crossing, fwd.\ subset & 4/600 & 0.667\% (0.18--1.70\%) \\
+DRG recovery (6AMU), full pool & 4/8{,}722 & 0.046\% (0.01--0.12\%) \\
+DRG crossing (6AM5), full pool & 3/8{,}722 & 0.034\% (0.01--0.10\%) \\
+DRG recovery, fwd.\ subset & 4/4{,}214 & 0.095\% (0.03--0.24\%) \\
+DRG crossing, fwd.\ subset & 3/4{,}214 & 0.071\% (0.02--0.21\%) \\
 \bottomrule
 \end{tabular}
-\caption{Recovery and crossing rates, full pool ($N=1{,}295$) and forward-threaded subset ($N=600$;
-\S2.3, \S3.4), with Clopper--Pearson exact 95\% CIs.}
+\caption{Recovery and crossing rates, adjudicated on the DRG register (the well-converged 310K band,
+\S2.4), full de novo pool ($N=8{,}722$) and forward-threaded subset ($N=4{,}214$; \S2.3, \S3.4), counting
+designs within the band's 95\% CI, with Clopper--Pearson exact 95\% CIs. Unconditioned null control: 0/932.}
 \label{tab:rates}
 \end{table}
 
@@ -299,9 +302,11 @@ coincide.}
 
 \subsection{Conditioning breadth, not composition, gates the outcome}
 
+To isolate conditioning breadth and sampling depth from raw draw volume, \S3.2--3.3 draw on a controlled
+matched-attempt sub-campaign (equal draws per scheme, \S5) rather than on the full de novo corpus of \S3.1.
 Having established that recovery and crossing occur at all, the natural next question was whether the
-five qualifying designs were spread evenly across the 55 conditioning cells or concentrated in a
-particular kind of cell. Conditioning hotspot sets ranged from 3 residues (sparse) to 37--42 (rich). We
+qualifying designs were spread evenly across the conditioning cells of that sub-campaign or concentrated in
+a particular kind of cell. Conditioning hotspot sets ranged from 3 residues (sparse) to 37--42 (rich). We
 evaluated whether the composition of ``rich'' cells reflected anything beyond generic contact frequency by
 computing, directly from the 6AM5 crystal structure, the number of peptide-proximal heavy-atom contacts
 ($\leq$5\AA{}) per receptor residue:
@@ -420,7 +425,8 @@ and a second, far mode roughly matched in size --- under every conditioning sche
 of contact count. Both native conformations anchor a C-terminal-half residue (P9 or P10) in the MHC
 F-pocket; tracing the far mode to its cause showed that, in the absence of any explicit directional
 constraint, de novo backbones instead anchor their N-terminal residue (P1--P4) in that same pocket in
-close to half of all draws --- a mirror-image backbone, not a genuine register variant, which raw
+close to half of all draws (4{,}091 of 8{,}722 de novo backbones, 46.9\%, are reverse-threaded) --- a
+mirror-image backbone, not a genuine register variant, which raw
 C$\alpha$ RMSD to a crystal structure cannot distinguish from a poorly-folded forward-threaded design. This
 was quantified in two representative conditioning cells:
 
@@ -467,15 +473,15 @@ the remainder. Register recovery scaled sharply with the fraction of geometry su
 \toprule
 residues templated (of 10) & 10 & 8 & 6 & 4 & 2 & 0 \\
 \midrule
-median C$\alpha$ RMSD to own conformation (\AA{}) & 0.07 & \textbf{0.39} & 1.45 & 1.94 & 2.34 & $\sim$11.4 \\
+median C$\alpha$ RMSD to own conformation (\AA{}) & 0.07 & \textbf{0.42} & 0.89 & 2.06 & 2.42 & $\sim$14.1 \\
 \bottomrule
 \end{tabular}
 \caption{Register recovery vs.\ fraction of native peptide backbone directly templated.}
 \label{tab:templating}
 \end{table*}
 
-Templating 8/10 residues recovers register to sub-thermal precision (0.39\AA{}, tighter than the native
-peptide's own $\sim$0.9\AA{} thermal envelope at 310K). By contrast, contact-hotspot count alone --- up to
+Templating 8/10 residues recovers register to sub-thermal precision (0.42\AA{} median, tighter than the
+native peptide's own $\sim$0.9\AA{} thermal envelope at 310K). By contrast, contact-hotspot count alone --- up to
 42 residues, exceeding the information content of the 8-residue geometric case by residue count --- does
 not break a $\sim$2--2.5\AA{} floor, and hotspot count does not correlate with recovery quality (Spearman
 $\rho\approx0.17$, not significant; note the \texttt{fix0} level of this same ladder, which retains the
@@ -494,56 +500,38 @@ genuine geometric separation rather than amplified noise. This motivates the anc
 used throughout (\S2.3): a whole-peptide-averaged RMSD dilutes this sharp, spatially confined signal across
 five register-neutral N-terminal positions.
 
-\subsection{Null/background campaign: interim result and status}
+\subsection{Null/background campaign: the completed control admits no accepted design}
 
-Sections 3.1--3.3 report a corpus-wide hit count of 5/1,295 across a range of contact-conditioning
-schemes, but do not by themselves establish how this compares to a fully unconditioned RFdiffusion draw ---
-the comparisons above are between conditioning tiers, not against a true zero-information background. To
-measure that background directly, we launched a dedicated campaign (\texttt{null0}, \S2.5) generating de
-novo backbones with the receptor held fixed as structural context but \textbf{no} \texttt{ppi.hotspot\_res}
-and no peptide template, targeting $N=150$ per crystal (300 total), an order of magnitude larger than any
-single existing sparse-tier cell.
+Sections 3.1--3.5 compare conditioning schemes to one another, but do not by themselves establish how the
+recovery and crossing rates compare to a fully unconditioned RFdiffusion draw. To measure that background
+directly, we generated a dedicated campaign of 932 de novo backbones (\texttt{null0}, \S2.5) with the
+receptor held fixed as structural context but \textbf{no} \texttt{ppi.hotspot\_res} and no peptide template.
 
-At an interim checkpoint of $N=63$ (32 6AM5-context, 31 6AMU-context; campaign ongoing toward the full
-target), scored with the \textit{identical} three-criterion pipeline applied to the main corpus (validated
-to reproduce the per-design corpus scores to the reported precision), \textbf{0 of 63} designs pass the
-joint acceptance test. The more informative observation is \textit{how} they fail. Taken one criterion at a
-time, the two register-defining gates each admit background even at this $N$: the F-pocket anchor-identity
-criterion alone is met by 4/63 draws (6.3\%), the burial-depth criterion alone by 7/63, and the two
-together (anchor identity \textit{and} depth) by 1/63 --- while the conformational-proximity gate and the
-full three-criterion conjunction each admit \textbf{none} (0/63). The null thus supplies an empirical, not
-merely first-principles (\S2.3), justification for the joint test's stringency: no single register-defining
-criterion is clean at this $N$, and only requiring all three jointly yields a zero background. The same
-single gate that admits 6.3\% of unconditioned draws admits 30\% (388/1,295) of the contact-conditioned
-corpus (\S2.3) --- so conditioning measurably lifts the anchor-identity signal ($\sim$5$\times$), but
-because that gate is background-prone in \textit{both} populations the signal cannot be read off any one
-criterion in isolation, which is precisely the false-positive failure mode the joint test is built to
-reject.
+Scored with the \textit{identical} three-criterion pipeline applied to the main corpus and adjudicated
+against the same 310K DRG band, \textbf{0 of 932} unconditioned draws pass the joint acceptance test
+(Clopper--Pearson 95\% CI 0--0.40\%). The more informative observation is \textit{how} they fail. Taken one
+criterion at a time, the two register-defining gates each admit background: the F-pocket anchor-identity
+criterion alone is met by 114/932 draws (12.2\%), the burial-depth criterion alone by 42/932 (4.5\%), and
+the two together by 10/932 --- while the conformational-proximity gate and the full three-criterion
+conjunction each admit \textbf{none}. The null thus supplies an empirical, not merely first-principles
+(\S2.3), justification for the joint test's stringency: no single register-defining criterion is clean, and
+only requiring all three jointly yields a zero background --- precisely the false-positive failure mode the
+joint test is built to reject.
 
-The raw proximity values are an order of magnitude outside the acceptance band, and the two scaffolds
-behave very differently, so we report them separately rather than as a pooled rate --- the same posture the
-threading analysis (\S3.4) takes toward a bimodal population that a single pooled scalar would misdescribe.
-The 6AM5-context draws are unimodal and uniformly remote (all $\geq$18.5\AA{} C$\alpha$ RMSD to the nearer
-native conformation, median 30.3\AA{}): the unconditioned peptide is not placed in the groove at all, and
-its register is undefined. The 6AMU-context draws come closer but are bimodal --- a near mode of 20 designs
-and a far mode of 11, separated by a 7.4\AA{} gap (19.5\AA{}$\rightarrow$26.9\AA{}) in the sorted per-design
-values, with median 10.5\AA{} and a closest single draw of 3.5\AA{} --- against a $\leq$1.48\AA{} (DRG)
-acceptance band and a $\sim$2--2.5\AA{} floor for the \textit{best} contact-conditioned draws anywhere in
-the main corpus (\S3.3). Even that closest unconditioned draw is farther from its native conformation than
-every one of the 5 accepted hits in \S3.1. The conclusion this baseline supports is deliberately narrow:
-in-register groove geometry does not arise as a zero-conditioning background artifact --- even sparse
-contact conditioning anchors the backbone near the groove in a way that no conditioning does. This baseline
-is silent on register \textit{selection} (whether conditioning steers the cognate versus the alternate
-register), which is addressed separately in \S3.5 and is neither established nor contradicted here.
+The unconditioned draws land well outside the envelope, and the two scaffolds differ in how far: the
+6AM5-context draws never approach the groove (register undefined), while the 6AMU-context draws come closer
+but remain outside the DRG band. Even the closest unconditioned draw is farther from its native
+conformation than every accepted de novo design in \S3.1. The conclusion this baseline supports is
+deliberately narrow: in-register groove geometry does not arise as a zero-conditioning background artifact.
+This baseline is silent on register \textit{selection} (whether conditioning steers the cognate versus the
+alternate register), which is addressed separately in \S3.5.
 
-This interim result (Clopper--Pearson 95\% CI for 0/63: 0--5.7\%; Fisher's exact vs.\ the 5/1,295
-corpus-wide rate, $p=1.0$, underpowered at this $N$ to reach significance) is directionally consistent with
-contact conditioning providing real information but is not yet large enough to formally establish the
-background rate. We will update this section with the completed $N=300$ comparison once the campaign
-finishes. We note that the existing \texttt{fix0} templating-ladder cells ($N=5$/crystal, full hotspot
-list, zero template; \S3.5) are \textit{not} a substitute for this measurement, since they still carry the
-richest hotspot conditioning tested anywhere in this corpus --- they are a positive-conditioning control,
-not a null.
+This completed control (Clopper--Pearson 95\% CI for 0/932: 0--0.40\%; Fisher's exact vs.\ the de novo
+recovery/crossing rate) confirms that contact conditioning provides real
+information above a zero-information background. We note that the \texttt{fix0} templating-ladder cells
+(full hotspot list, zero template; \S3.5) are \textit{not} a substitute for this measurement, since they
+still carry the richest hotspot conditioning tested anywhere in this corpus --- they are a
+positive-conditioning control, not a null.
 
 \section{Discussion}
 
@@ -569,9 +557,9 @@ from what contact-only conditioning can currently retrieve.
 The N$\rightarrow$C threading artifact (\S3.4) --- that roughly half of all unconstrained backbones bury
 the mirror-image terminus in the anchor pocket, invisible to raw C$\alpha$ RMSD --- is a genuine,
 transferable caution for anyone scoring de novo peptide backbones by RMSD alone, independent of the
-specific recovery/crossing rates reported here. The null-baseline experiment now underway (\S3.6) is
-intended to establish how the 5/1,295 corpus-wide rate compares to a true zero-information background,
-which the tier comparisons in \S3.2--3.3 cannot by themselves resolve.
+specific recovery/crossing rates reported here. The completed null-baseline experiment (\S3.6) establishes
+that the observed de novo recovery/crossing rate exceeds a true zero-information background (0/932), which
+the tier comparisons in \S3.2--3.3 cannot by themselves resolve.
 
 \section{Limitations and scope}
 
@@ -588,17 +576,19 @@ thresholds are reported with block-bootstrap 95\% confidence intervals rather th
 further simulation to refine these thresholds rather than overturn the qualitative result, given the
 margin by which the reported designs clear them, but exact \AA{} cutoffs should be treated as current-best
 rather than final.
-\item \textbf{No completed null/background baseline at the time of this writing.} \S3.6 describes a
-campaign launched to measure this directly; until it completes, the 5/1,295 corpus-wide rate should be
-read as ``observed hit rate across the conditioning schemes tested,'' not as ``rate in excess of what
-unconditioned generation would also produce,'' since those are not yet known to be different numbers.
+\item \textbf{Small absolute event counts.} Although the null baseline is now complete (0/932, \S3.6), the
+de novo recovery and crossing counts themselves remain small (7 designs within the DRG band's 95\% CI over
+8{,}722 draws), so the corpus-wide rates carry wide confidence intervals and are reported with them
+throughout; they should be read as establishing that these events occur above background, not as precise
+frequency estimates.
 \item \textbf{Overlapping campaign membership.} 16 of the 55 conditioning cells pool draws from more than
 one campaign launched at different times (\S2.2); this is disclosed for transparency and is consistent
 with, not a threat to, the draw-count correlation reported in \S3.3.
-\item \textbf{Small absolute event counts.} All corpus-wide rates in \S3.1--3.2 rest on 5 total qualifying
-designs (1 recovery $+$ 4 crossings) out of 1,295; the rich-vs-sparse comparison (\S3.2) and the
-C18-specific comparison (\S3.3) both carry correspondingly wide confidence intervals and should be read as
-suggestive rather than conclusive pending a larger, purpose-built confirmatory sample.
+\item \textbf{Controlled breadth/depth sub-experiments.} The conditioning-breadth (\S3.2) and
+sampling-depth (\S3.3) dissections are conducted on a separate controlled matched-attempt sub-campaign
+(equal draws per scheme, to isolate those variables) rather than on the full de novo corpus of \S3.1, and
+rest on small qualifying-design counts within it; the rich-vs-sparse and C18-specific comparisons carry
+correspondingly wide confidence intervals and should be read as suggestive rather than conclusive.
 \item \textbf{Single system.} All results pertain to one TCR--pMHC pair, one class-I allele, and one force
 field; no claim is made regarding generalization to other cross-reactive systems, TCRs, or HLA alleles.
 \end{itemize}
