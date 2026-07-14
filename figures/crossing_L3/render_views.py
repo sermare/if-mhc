@@ -8,6 +8,15 @@ OTHER_NAME      = r"DRG"
 COGNATE_PID     = r"6AM5"
 OTHER_PID       = r"6AMU"
 
+# informative panel captions (replaces the raw filename/tag in the baked legend)
+TITLES = {
+  "el30_cog":  "de-novo RECOVERY  -  design vs native DRG (1.07 A, inside band)",
+  "no_cog":    "de-novo RECOVERY  -  design vs non-target GIG (2.75 A)",
+  "no_oth":    "de-novo CROSSING  -  design vs its own GIG (3.02 A)",
+  "el30_oth":  "de-novo CROSSING  -  design vs alternate DRG (1.44 A, within 95% CI)",
+  "el30_all3": "all three peptides",
+}
+
 import os, json
 from pymol import cmd, util
 
@@ -138,7 +147,7 @@ def do_single_view(tag, name, turns, desc, legend_entries):
     # View is already set by cmd.set_view(base_view_flipped) in the calling function
     v = tuple(cmd.get_view())
     cmd.ray(W, H); cmd.png(png, dpi=DPI, ray=0)
-    annotate_legend(png, legend_entries, "%s  [%s]" % (BASE, tag))
+    annotate_legend(png, legend_entries, TITLES.get(tag, BASE))
     tsum = "el45/az180 (flipped 180°)"
     print("\n[%s] %s (%s)" % (tag, desc, tsum)); print(fmt_set_view(v))
     

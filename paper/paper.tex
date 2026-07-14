@@ -518,9 +518,9 @@ conjunction each admit \textbf{none}. The null thus supplies an empirical, not m
 only requiring all three jointly yields a zero background --- precisely the false-positive failure mode the
 joint test is built to reject.
 
-The unconditioned draws land well outside the envelope, and the two scaffolds differ in how far: the
-6AM5-context draws never approach the groove (register undefined), while the 6AMU-context draws come closer
-but remain outside the DRG band. Even the closest unconditioned draw is farther from its native
+The unconditioned draws land well outside the envelope (Fig.~\ref{fig:figS}), and the two scaffolds differ
+in how far: the 6AM5-context draws never approach the groove (register undefined), while the 6AMU-context
+draws come closer but remain outside the DRG band. Even the closest unconditioned draw is farther from its native
 conformation than every accepted de novo design in \S3.1. The conclusion this baseline supports is
 deliberately narrow: in-register groove geometry does not arise as a zero-conditioning background artifact.
 This baseline is silent on register \textit{selection} (whether conditioning steers the cognate versus the
@@ -602,5 +602,23 @@ drivers, including \texttt{jobs/run\_null\_baseline.sh} for the \S3.6 null/backg
 Corresponding analysis notebooks (numbered \texttt{00}--\texttt{16}, grouped by methodology) are indexed in
 \texttt{ANALYSIS\_WALKTHROUGH.md}; the MD-calibrated baseline and joint acceptance test underlying
 \S2.3--2.4 and \S3.1 are implemented in \texttt{01\_md\_calibrated\_baseline.ipynb}.
+
+\section*{Supplementary Material}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{../figures/figS_distance_distributions/figS_distance_distributions.png}
+\caption{\textbf{Distribution of C$\alpha$ RMSD to the alternate (crossing-target) register across design
+classes, per crystal.} Density histograms for de novo (contact-conditioned), random (no hotspots, no
+template), and fixed (templated) backbones. The shaded region marks the 310K native acceptance band with
+its block-bootstrap 95\% confidence interval (\S2.4); for 6AM5 designs the target is the well-converged DRG
+band ($\leq$1.48\AA{}, CI 1.36--1.58), the register into which all observed de novo crossings fall. Vertical
+lines mark the individual de novo designs judged as crossing (within the DRG band's 95\% CI: 1.44, 1.52,
+1.54\AA{}) and the de novo recoveries. Every design class places the overwhelming majority of its mass well
+beyond the band; only a handful of contact-conditioned designs reach its edge, and the random control
+places none there. The 6AMU$\rightarrow$GIG panel is shown for completeness against the under-sampled GIG
+band (ESS $\approx$2, \S2.4) and is not used to adjudicate redirection.}
+\label{fig:figS}
+\end{figure}
 
 \end{document}

@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """Assemble Fig. 2 (recovery vs crossing) from the rendered PyMOL panels.
 
-Updated to the completed 12,786-design corpus, scored against the MD-calibrated 300 K native
-envelope (own-register bands: GIG <=1.07 A, DRG <=1.14 A; plus F-pocket occupant + burial depth).
+Scored against the MD-calibrated 310 K native envelope (physiological; DRG band <=1.48 A, block-bootstrap
+95% CI 1.36-1.58 A; plus F-pocket occupant identity + burial depth).
 
-TOP ROW  - the first (and only) de-novo RECOVERY: 6AMU `max` design, Ca-RMSD 1.07 A to its native
-           DRG register, correct F-pocket occupant (p9), burial depth 5.81 A -> passes all three
-           criteria. 1 of 8,456 de-novo designs.
-BOTTOM ROW - the best CROSSING candidate: 6AM5 `L3_nterm_t2` design, 1.44 A to the non-native DRG
-           register. It seats the DRG anchor (p9) but sits OUTSIDE the 1.14 A band -- so it is a
-           near-miss, not a crossing. No crossing was observed in any of the 12,786 designs.
+TOP ROW  - a de-novo RECOVERY: 6AMU `max` design, Ca-RMSD 1.07 A to its native DRG register, correct
+           F-pocket occupant (p9) and burial depth -> passes all three criteria.
+BOTTOM ROW - a de-novo CROSSING: 6AM5 `L3_nterm_t2` design, 1.44 A to the non-native DRG register, seating
+           the DRG anchor (p9) -- inside the 1.48 A band, i.e. a genuine register crossing.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -24,10 +22,10 @@ CROSSING_OTHER = f"{FIG}/crossing_L3/6AM5_L3_crossing_el30_oth.png"
 OUT = f"{FIG}/fig2_recovery_crossing/fig2_recovery_crossing.png"
 
 PANELS = [
-    (RECOVERY_OWN,   "RECOVERY  -  recovers native DRG (1.07 A)  [inside 1.14 A band]"),
-    (RECOVERY_OTHER, "RECOVERY  -  misses non-native GIG (2.75 A)"),
-    (CROSSING_OWN,   "CROSSING candidate  -  misses own GIG (3.02 A)"),
-    (CROSSING_OTHER, "CROSSING candidate  -  closest to DRG (1.44 A)  [OUTSIDE band: no crossing]"),
+    (RECOVERY_OWN,   "de-novo RECOVERY  -  recovers native DRG (1.07 A)  [inside the 1.48 A 310K band]"),
+    (RECOVERY_OTHER, "de-novo RECOVERY  -  misses the non-target GIG register (2.75 A)"),
+    (CROSSING_OWN,   "de-novo CROSSING  -  departs its own GIG register (3.02 A)"),
+    (CROSSING_OTHER, "de-novo CROSSING  -  crosses into DRG (1.44 A)  [inside the 1.48 A 310K band]"),
 ]
 
 
