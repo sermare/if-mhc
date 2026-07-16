@@ -15,7 +15,7 @@ Contigs/hotspots are copied verbatim from the validated per-campaign spec files:
   jobs/recover_spec.tsv (fix ladder), inputs/focus_6am/ablation_spec.tsv (mhc/tcr subsets).
 All runs: de-novo 10-mer peptide, full T=30, Complex_base_ckpt, MHC/B2M/TCR held as context.
 """
-TARGET = 150
+TARGET = 600   # flat: 600 FRESH Savio designs per crystal per condition
 
 # base structural context contig per crystal (chains A=MHC, B=B2M, D/E=TCR)
 BASE = {
@@ -91,7 +91,7 @@ for r in rows:
     fixc = r[3] if len(r)>3 else None
     for x in ("6AM5","6AMU"):
         hot,cur = perx[x]
-        tgt = max(0, TARGET-cur)
+        tgt = TARGET   # flat target (worker counts existing Savio designs and tops each cell up to it)
         suffix = fixc if fixc else DENOVO
         contig = f"{BASE[x]} {suffix}"
         out.append((x,cond,style,str(tgt),contig,hot))

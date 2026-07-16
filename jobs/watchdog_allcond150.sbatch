@@ -7,7 +7,7 @@
 # Each instance self-resubmits before its walltime; --requeue covers preemption. This is a
 # BACKSTOP -- the primary engine is a large standing worker array that self-drains without it.
 #SBATCH --account=co_nilah
-#SBATCH --partition=savio2
+#SBATCH --partition=savio3_htc
 #SBATCH --qos=savio_lowprio
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
