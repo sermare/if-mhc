@@ -282,6 +282,40 @@ designs within the band's 95\% CI, with Clopper--Pearson exact 95\% CIs. Uncondi
 \label{tab:rates}
 \end{table}
 
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrrr@{\hskip 2em}llrrr@{}}
+\toprule
+scheme & class & 6AM5 & 6AMU & total & scheme & class & 6AM5 & 6AMU & total \\
+\midrule
+\texttt{k14}         & de novo & 607 & 610 & 1{,}217 & \texttt{k24}         & de novo   & 601 & 602 & 1{,}203 \\
+\texttt{L5\_max}     & de novo & 608 & 608 & 1{,}216 & \texttt{max}         & de novo   & 601 & 600 & 1{,}201 \\
+\texttt{L3\_nterm\_t2} & de novo & 608 & 606 & 1{,}214 & \texttt{fix0}        & templated & 605 & 607 & 1{,}212 \\
+\texttt{L4\_expanded} & de novo & 610 & 604 & 1{,}214 & \texttt{fix6}        & templated & 605 & 606 & 1{,}211 \\
+\texttt{k18}         & de novo & 609 & 602 & 1{,}211 & \texttt{fix2}        & templated & 600 & 607 & 1{,}207 \\
+\texttt{mhc\_tcr2}   & de novo & 606 & 605 & 1{,}211 & \texttt{fix4}        & templated & 601 & 605 & 1{,}206 \\
+\texttt{mhc\_tcr1}   & de novo & 604 & 604 & 1{,}208 & \texttt{fix8}        & templated & 601 & 604 & 1{,}205 \\
+\texttt{L1\_nterm}   & de novo & 601 & 606 & 1{,}207 & \texttt{null0}       & null      & 764 & 769 & 1{,}533 \\
+\texttt{L2\_nterm\_t1} & de novo & 602 & 604 & 1{,}206 & \texttt{xo\_nt5\_own} & crossover & 43  & 25  & 68 \\
+\texttt{tcr2}        & de novo & 602 & 603 & 1{,}205 & \texttt{xo\_nt4\_own} & crossover & 41  & 22  & 63 \\
+\texttt{mhc}         & de novo & 601 & 602 & 1{,}203 & \texttt{xo\_nt3\_own} & crossover & 40  & 21  & 61 \\
+\texttt{tcr1}        & de novo & 600 & 603 & 1{,}203 & \texttt{xo\_nt2\_own} & crossover & 31  & 21  & 52 \\
+                     &         &     &     &         & \texttt{xo\_nt4\_cross} & crossover & 26 & 21 & 47 \\
+                     &         &     &     &         & \texttt{xo\_nt2\_cross} & crossover & 26 & 21 & 47 \\
+\bottomrule
+\end{tabular}
+\caption{Designs generated per conditioning scheme, per crystal (6AM5 $=$ GIG context, 6AMU $=$ DRG
+context), across the complete converged campaign (24{,}831 designs total: 16{,}919 de novo, 6{,}041
+templated, 1{,}533 null, 338 crossover). The 20 primary schemes were each run to 600 designs per crystal;
+the crossover schemes are a lower-volume targeted mechanistic probe (\S3.6). The register statistics in
+Tables~\ref{tab:rates}--\ref{tab:best26} are adjudicated on the frozen de novo analysis pool ($N=8{,}722$);
+this table reports the full generation totals.}
+\label{tab:campaign}
+\end{table*}
+
 All three criteria (proximity, anchor identity, depth) were satisfied simultaneously by each reported
 design; none is a marginal call on a single axis. The closest de-novo crossing design (C$\alpha$ RMSD
 1.44\AA{} to the alternate conformation's mean, correct anchor position, correct depth) is 1.03\AA{} from a

@@ -28,6 +28,10 @@
 !paper/aaai.sty
 !paper/aaai.bst
 !paper/fixbib.sty
+# ISCB abstract-book submission: 250-word text abstract + single-page print-ready PDF
+!paper/iscb_onepager.tex
+!paper/iscb_onepager.pdf
+!paper/iscb_abstract_250w.txt
 
 # figures (final renders + the scripts that build them)
 !figures/

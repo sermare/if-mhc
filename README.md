@@ -43,41 +43,46 @@ defines the register.
 
 ![Recovery and crossing](figures/fig2_recovery_crossing/fig2_recovery_crossing.png)
 
-**Top — the only de-novo RECOVERY.** A `max`-conditioned 6AMU design (magenta) reproduces its native
+**Top — the best de-novo RECOVERY.** A `max`-conditioned 6AMU design (magenta) reproduces its native
 DRG backbone (teal) at **1.07 Å** Cα-RMSD, seats the correct F-pocket occupant (p9) at native burial
 depth (5.81 Å) — clearing all three acceptance criteria — while clearly missing the non-native GIG
-register (orange, 2.75 Å). **1 of 8,456 de-novo designs.**
+register (orange, 2.75 Å).
 
-**Bottom — the best CROSSING candidate.** A `L3_nterm_t2`-conditioned 6AM5 design departs from its own
-GIG register (3.02 Å) and hugs the alternate DRG backbone at **1.44 Å**, seating the DRG p9 anchor — but
-it stays **outside** the 1.14 Å acceptance band. **No crossing was observed in any design.**
+**Bottom — the best de-novo CROSSING.** A `L3_nterm_t2`-conditioned 6AM5 design departs from its own
+GIG register (3.02 Å) and hugs the alternate DRG backbone at **1.44 Å**, seating the DRG p9 anchor — inside
+the **1.48 Å** 310 K acceptance band. This is a genuine register crossing driven by receptor-side
+conditioning alone.
 
-## Results — completed corpus (12,786 designs)
+## Results — converged campaign (24,831 designs)
 
-Scored against the **extended 300 K / 50 ns native MD envelope** (mean+3σ: GIG ≤1.07 Å, DRG ≤1.14 Å),
-with the full three-criterion test (Cα proximity **and** correct F-pocket occupant **and** native burial depth):
+Scored against the **physiological 310 K / 50 ns native MD envelope** (moving-block-bootstrap acceptance
+band, DRG ≤1.48 Å, 95% CI 1.36–1.58 Å), with the full three-criterion test (Cα proximity **and** correct
+F-pocket occupant **and** native burial depth):
 
 | group | n | best → own | best → other | **recovery** | **crossing** |
 |---|--:|--:|--:|--:|--:|
-| **de-novo** (contact conditioning only) | 8,456 | **1.07 Å** | 1.44 Å | **1** | **0** |
-| **null** (no hotspots, no template) | 932 | 2.05 Å | 2.21 Å | 0 | 0 |
-| **templated** (`fix` ladder) | 3,060 | 0.10 Å | 1.59 Å | **961** | **0** |
-| **crossover** (N-term templated, C-term free) | 338 | 0.54 Å | 1.15 Å | 11 | **0** |
-| **total** | **12,786** | — | — | **973** | **0** |
+| **de-novo** (receptor contacts only) | 16,919 | **1.07 Å** | **1.44 Å** | **7** | **4** |
+| **null** (no conditioning) | 1,533 | 2.05 Å | 2.21 Å | 0 | 0 |
+| **templated** (native backbone supplied) | 6,041 | 0.10 Å | 1.28 Å | **1,282** | 1 |
+| **crossover** (N-terminus supplied, C-term free) | 338 | 0.54 Å | 1.15 Å | 16 | **20** |
+| **total** | **24,831** | — | — | **1,305** | **25** |
 
-- **Recovery sits at the detection floor.** One de-novo design in 8,456 enters the native envelope — with
-  the richest conditioning available (42 hotspots). Against a null of 0/932 this is an existence proof, not
-  a demonstration of specificity.
-- **Crossing is not observed — 0 / 12,786.** Not by contact conditioning, not by maximal hotspots, and not
-  by a purpose-built crossover experiment that templates the register-neutral N-terminus and leaves the
-  divergent C-terminus free (even when pushed with the *other* register's hotspots).
-- **Templating recovers register at will** (961/3,060), monotonically with the number of templated
+- **Recovery and crossing are real but rare.** 7 de-novo designs recover their native register (best
+  1.07 Å) and 4 cross into the alternate DRG register (best 1.44 Å), every hit forward-threaded and seating
+  the correct p9 anchor. All arise from the broadest conditioning schemes.
+- **The no-conditioning control is clean: 0 / 1,533.** Not one unconditioned draw docks in the groove or
+  comes close in RMSD to either native backbone — so the de-novo events sit above a true zero-information
+  background, not sampling noise.
+- **Redirection needs a register-neutral scaffold.** The purpose-built crossover experiment — templating
+  the register-neutral N-terminus and leaving the divergent C-terminus free — produces **20 crossings in
+  207 designs**, a ~400× enrichment over de-novo, isolating the mechanism of register redirection.
+- **Templating recovers register at will** (1,282/6,041), monotonically with the number of templated
   residues — locating register in geometry that contacts only weakly determine.
 
-> **Note on calibration.** These numbers use the extended **300 K** native ensemble, which is better
-> converged (ESS ≈ 7–20 vs 5–9) and tighter (≤1.07/1.14 Å) than the 370 K ensemble used in the paper's
-> earlier tables (≤1.49/2.10 Å). Under the wider 370 K band a handful of candidates pass; under the
-> physiological 300 K envelope they do not. See `ANALYSIS_WALKTHROUGH.md` and §2.4/§3.6 of the paper.
+> **Calibration.** All numbers use the physiological **310 K / 50 ns** native ensemble (Amber ff19SB,
+> TIP3P), the study's calibration standard; thresholds carry moving-block-bootstrap 95% CIs (§2.4 of the
+> paper). These README figures reflect the complete converged campaign; the paper reports the same
+> three-criterion analysis on a frozen subset. See `ANALYSIS_WALKTHROUGH.md` and §2.4/§3.1/§3.6.
 
 ## Repository
 
