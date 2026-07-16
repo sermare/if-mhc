@@ -31,11 +31,11 @@
 
 \noindent\textbf{Motivation.}
 Some T-cell receptors recognize several different peptides by letting each peptide fold into a different
-shape inside the same MHC groove [3]. Deep generative models can now build protein backbones (RFdiffusion
-[1]) and design their sequences (ProteinMPNN [2]) with high accuracy. Together these raise a simple
-question: given only the receptor side of the interaction, can such a model be steered to build a peptide
-backbone in one chosen target shape, even a shape that is not the one closest to its input? We test this in
-a well-studied two-peptide system [3]: the DMF5 receptor on HLA-A*02:01 binds two 10-residue peptides, GIG
+shape inside the same MHC groove [2]. Deep generative models can now build protein backbones with high
+accuracy (RFdiffusion [1]), which raises a simple question: given only the receptor side of the
+interaction, can such a model be steered to build a peptide backbone in one chosen target shape, even a
+shape that is not the one closest to its input? We test this in a well-studied two-peptide system [2]: the
+DMF5 receptor on HLA-A*02:01 binds two 10-residue peptides, GIG
 (crystal 6AM5) and DRG (6AMU), whose backbones differ by 2.87\,\AA. That difference is almost entirely at
 the tail end (the first four positions are nearly identical, within 1.14\,\AA, while position 6 moves
 5.62\,\AA), and which shape, or register, a peptide takes is set by which residue drops into the MHC
@@ -94,9 +94,7 @@ crossover (N-term given)      & 338     & 0.54 & 16 & 20 \\
 {\footnotesize
 [1] Watson JL et al. De novo design of protein structure and function with RFdiffusion. Nature
 620:1089--1100 (2023).
-[2] Dauparas J et al. Robust deep learning-based protein sequence design using ProteinMPNN. Science
-378:49--56 (2022).
-[3] Riley TP et al. T cell receptor cross-reactivity expanded by dramatic peptide-MHC adaptability.
+[2] Riley TP et al. T cell receptor cross-reactivity expanded by dramatic peptide-MHC adaptability.
 Nat.\ Chem.\ Biol.\ 14:934--942 (2018).
 \par}
 
