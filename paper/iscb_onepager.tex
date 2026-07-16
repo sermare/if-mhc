@@ -30,39 +30,39 @@
 ]
 
 \noindent\textbf{Motivation.}
-Cross-reactive TCR/pMHC systems, in which one receptor engages chemically distinct peptides through
-distinct bound backbone conformations, pose a question orthogonal to conventional epitope design.
-Can a structure-conditioned generative model be steered, from receptor-side information alone, toward a
-specific target backbone conformation, including, deliberately, one other than the conformation nearest its
-conditioning input? We use a minimal two-state system: the DMF5 TCR on HLA-A*02:01, which accommodates two
-decameric peptides, GIG (\texttt{SMLGIGIVPV}, crystal 6AM5) and DRG (\texttt{MMWDRGLGMM}, 6AMU), via
-backbones separated by 2.87\,\AA{} C$\alpha$ RMSD. That difference is almost entirely C-terminal (P1 to P4
-are identical to within 1.14\,\AA{}, while P6 diverges by 5.62\,\AA), and register is defined by which
-peptide position buries in the F-pocket (p10 for GIG, p9 for DRG).
+Some T-cell receptors recognize several different peptides by letting each peptide fold into a different
+shape inside the same MHC groove [3]. Deep generative models can now build protein backbones (RFdiffusion
+[1]) and design their sequences (ProteinMPNN [2]) with high accuracy. Together these raise a simple
+question: given only the receptor side of the interaction, can such a model be steered to build a peptide
+backbone in one chosen target shape, even a shape that is not the one closest to its input? We test this in
+a well-studied two-peptide system [3]: the DMF5 receptor on HLA-A*02:01 binds two 10-residue peptides, GIG
+(crystal 6AM5) and DRG (6AMU), whose backbones differ by 2.87\,\AA. That difference is almost entirely at
+the tail end (the first four positions are nearly identical, within 1.14\,\AA, while position 6 moves
+5.62\,\AA), and which shape, or register, a peptide takes is set by which residue drops into the MHC
+F-pocket (position 10 for GIG, position 9 for DRG).
 
 \noindent\textbf{Methods.}
 Conditioning only on receptor-side contact residues, with no peptide-backbone template, we asked whether
-RFdiffusion can generate a C$\alpha$ backbone that recovers a peptide's own native register or crosses into
-the alternate one. We generated a converged corpus of \textbf{24{,}831} designs: 600 designs per crystal for
-each of 20 conditioning schemes, plus a focused N-terminus-seeding experiment. Designs are scored against a
-three-criterion register test calibrated not to a single crystal but to \textbf{native molecular-dynamics
-ensembles} (Amber ff19SB, TIP3P, physiological \textbf{310\,K}, 50\,ns): C$\alpha$ proximity within a
-moving-block-bootstrap acceptance band (DRG within 1.48\,\AA, 95\% CI 1.36 to 1.58), correct F-pocket
-occupant identity, and native burial depth. We additionally correct for a forward/reverse backbone-threading
-artifact that raw RMSD cannot detect.
+RFdiffusion [1] can generate a C$\alpha$ backbone that recovers a peptide's own native register or crosses
+into the alternate one. We generated 300 designs per crystal for each of 20 conditioning schemes, plus a
+focused N-terminus-seeding experiment. Designs are scored against a three-criterion register test calibrated
+not to a single crystal but to \textbf{native molecular-dynamics ensembles} (Amber ff19SB, TIP3P,
+physiological \textbf{310\,K}, 50\,ns): C$\alpha$ proximity within a moving-block-bootstrap acceptance band
+(DRG within 1.48\,\AA, 95\% CI 1.36 to 1.58), correct F-pocket occupant identity, and native burial depth.
+We additionally correct for a forward/reverse backbone-threading artifact that raw RMSD cannot detect.
 
 \noindent\textbf{Results.}
 Both recovery and redirection are achievable but rare, and are gated by the breadth of conditioning rather
-than by any specific curated residue set. Across the de novo corpus, 7 of 16{,}919 designs recover the
-native DRG register (best 1.07\,\AA) and 4 of 16{,}919 cross into the alternate DRG register (best
-1.44\,\AA), every hit forward-threaded and seating the correct p9 anchor, all arising from the broadest
-conditioning schemes. Critically, our no-conditioning control produced \textbf{zero} designs that dock in
-the groove or come close in RMSD to either native backbone: \textbf{0 of 1{,}533} unconditioned draws
-entered the acceptance band or seated an anchor, so the recovery and crossing events are real signal above a
-true zero-information background, not sampling noise. A templating control that supplies backbone geometry
-directly recovers register almost at will and monotonically with the number of templated residues, whereas
-contact conditioning alone only weakly determines it, locating register in a spatially confined C-terminal
-signal. These results, from a single well-characterized system, map the current capability boundary of
+than by any specific curated residue set. Across the de novo corpus, 4 of 8{,}722 designs recover the native
+DRG register (best 1.07\,\AA) and 3 of 8{,}722 cross into the alternate DRG register (best 1.44\,\AA), every
+hit forward-threaded and seating the correct p9 anchor, all arising from the broadest conditioning schemes.
+Critically, our no-conditioning control produced \textbf{zero} designs that dock in the groove or come close
+in RMSD to either native backbone: \textbf{0 of 932} unconditioned draws entered the acceptance band or
+seated an anchor, so the recovery and crossing events are real signal above a true zero-information
+background, not sampling noise. A templating control that supplies backbone geometry directly recovers
+register on demand, monotonically with the number of templated residues (best 0.10\,\AA), whereas contact
+conditioning alone only weakly determines it, locating register in a spatially confined tail-end signal.
+These results, from a single well-characterized system, map the current capability boundary of
 contact-conditioned backbone generation and separate what it can retrieve from what must still be supplied
 as explicit geometry.
 
@@ -72,24 +72,35 @@ as explicit geometry.
 \end{center}
 \vspace{-2pt}
 
-{\small
-\captionof{table}{Full converged corpus (24{,}831 designs), scored against the 310\,K native envelope.
-Recoveries land in the peptide's own native register; crossings land in the alternate register.}
-\renewcommand{\arraystretch}{1.35}
-\setlength{\tabcolsep}{5pt}
+{\footnotesize
+\captionof{table}{De novo and control designs, scored against the 310\,K native envelope. Recoveries land in
+the peptide's own native register; crossings land in the alternate register.}
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrccc@{}}
 \toprule
-design group & $n$ & \makecell{best RMSD\\to own (\AA)} & recov. & cross. \\
+design group & $n$ & \makecell{best RMSD\\own (\AA)} & recov. & cross. \\
 \midrule
-de novo (receptor contacts only)   & 16{,}919 & 1.07 & 7      & 4  \\
-null control (no conditioning)      & 1{,}533  & 2.05 & 0      & 0  \\
-templated (native backbone given)   & 6{,}041  & 0.10 & 1{,}282 & 1  \\
-crossover (N-terminus given)        & 338      & 0.54 & 16     & 20 \\
+de novo (receptor contacts)  & 8{,}722 & 1.07 & 4 & 3 \\
+null (no conditioning)        & 932     & 2.05 & 0 & 0 \\
+templated (backbone given)    & 3{,}060 & 0.10 & \multicolumn{2}{c}{register on demand} \\
+crossover (N-term given)      & 338     & 0.54 & 16 & 20 \\
 \bottomrule
 \end{tabular}\par
 }
 
 \vspace{3pt}
+\noindent\textbf{References.}
+{\footnotesize
+[1] Watson JL et al. De novo design of protein structure and function with RFdiffusion. Nature
+620:1089--1100 (2023).
+[2] Dauparas J et al. Robust deep learning-based protein sequence design using ProteinMPNN. Science
+378:49--56 (2022).
+[3] Riley TP et al. T cell receptor cross-reactivity expanded by dramatic peptide-MHC adaptability.
+Nat.\ Chem.\ Biol.\ 14:934--942 (2018).
+\par}
+
+\vspace{2pt}
 \noindent\textbf{Availability.}
 Code, the MD-calibrated scorer, campaign drivers, and curated design archives:
 \texttt{github.com/sermare/if-mhc}.
