@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Assemble Fig. 2 (recovery vs crossing) from the rendered PyMOL panels.
+"""Assemble Fig. 2 as a bare 2x2 tile of the rendered PyMOL structure panels.
 
-Scored against the MD-calibrated 310 K native envelope (physiological; DRG band <=1.48 A, block-bootstrap
-95% CI 1.36-1.58 A; plus F-pocket occupant identity + burial depth).
+  LEFT column  = RECOVERY       (6AMU `max` design vs its own DRG register, and vs non-target GIG)
+  RIGHT column = CROSS-REACTIVE (6AM5 `L3_nterm_t2` design vs its own GIG, and vs the DRG it crosses into)
 
-TOP ROW  - a de-novo RECOVERY: 6AMU `max` design, Ca-RMSD 1.07 A to its native DRG register, correct
-           F-pocket occupant (p9) and burial depth -> passes all three criteria.
-BOTTOM ROW - a de-novo CROSSING: 6AM5 `L3_nterm_t2` design, 1.44 A to the non-native DRG register, seating
-           the DRG anchor (p9) -- inside the 1.48 A band, i.e. a genuine register crossing.
+Deliberately NO baked column headers / colour key / captions: when the whole grid is scaled into a journal
+or one-page-abstract column, any text baked into the image becomes illegible. The column headers and the
+colour key are therefore added in LaTeX (at true document font size) around this image -- see paper.tex /
+iscb_onepager.tex. Colour is by peptide identity: DRG teal, GIG orange, design magenta, MHC groove grey.
 """
 import os
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FIG = os.path.join(ROOT, "figures")
@@ -21,36 +21,15 @@ CROSSING_OWN   = f"{FIG}/crossing_L3/6AM5_L3_crossing_no_oth.png"
 CROSSING_OTHER = f"{FIG}/crossing_L3/6AM5_L3_crossing_el30_oth.png"
 OUT = f"{FIG}/fig2_recovery_crossing/fig2_recovery_crossing.png"
 
-PANELS = [
-    (RECOVERY_OWN,   "de-novo RECOVERY  -  recovers native DRG (1.07 A)  [inside the 1.48 A 310K band]"),
-    (RECOVERY_OTHER, "de-novo RECOVERY  -  misses the non-target GIG register (2.75 A)"),
-    (CROSSING_OWN,   "de-novo CROSSING  -  departs its own GIG register (3.02 A)"),
-    (CROSSING_OTHER, "de-novo CROSSING  -  crosses into DRG (1.44 A)  [inside the 1.48 A 310K band]"),
-]
+# row-major order -> left column = recovery, right column = cross-reactive
+PANELS = [RECOVERY_OWN, CROSSING_OWN,      # top row
+          RECOVERY_OTHER, CROSSING_OTHER]  # bottom row
 
-
-def load_font(sz):
-    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-              "/usr/share/fonts/dejavu/DejaVuSans.ttf", "DejaVuSans.ttf"):
-        try:
-            return ImageFont.truetype(p, sz)
-        except Exception:
-            pass
-    return ImageFont.load_default()
-
-
-f = load_font(34)
-ims = [Image.open(p).convert("RGB") for p, _ in PANELS]
+ims = [Image.open(p).convert("RGB") for p in PANELS]
 cw, ch = ims[0].width, ims[0].height
-pad_top = 48
-ncols = nrows = 2
-canvas = Image.new("RGB", (cw * ncols, (ch + pad_top) * nrows), (255, 255, 255))
-d = ImageDraw.Draw(canvas)
-for i, (im, (_, label)) in enumerate(zip(ims, PANELS)):
-    r, c = divmod(i, ncols)
-    x, y = c * cw, r * (ch + pad_top)
-    canvas.paste(im, (x, y + pad_top))
-    d.text((x + 10, y + 6), label, fill=(0, 0, 0), font=f)
-
+canvas = Image.new("RGB", (cw * 2, ch * 2), (255, 255, 255))
+for i, im in enumerate(ims):
+    r, c = divmod(i, 2)
+    canvas.paste(im, (c * cw, r * ch))
 canvas.save(OUT)
 print("wrote", OUT)

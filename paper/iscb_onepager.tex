@@ -10,6 +10,11 @@
 \usepackage{makecell}
 \usepackage{booktabs}
 \usepackage{microtype}
+\usepackage{xcolor}
+\definecolor{drgteal}{RGB}{0,191,191}
+\definecolor{gigorange}{RGB}{255,128,0}
+\definecolor{mhcgrey}{RGB}{160,160,160}
+\newcommand{\sq}[1]{\textcolor{#1}{\rule{1.4ex}{1.4ex}}}
 \setlength{\columnsep}{0.25in}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \setlength{\parindent}{1em}
@@ -69,9 +74,13 @@ recognition that constrains the safety of TCR-based therapies.
 
 \vspace{2pt}
 \begin{center}
-\includegraphics[width=\columnwidth]{../figures/fig2_recovery_crossing/fig2_recovery_crossing.png}
+\makebox[0.5\columnwidth][c]{\small\bfseries RECOVERY}\makebox[0.5\columnwidth][c]{\small\bfseries CROSS-REACTIVE}\\[1pt]
+\includegraphics[width=0.90\columnwidth]{../figures/fig2_recovery_crossing/fig2_recovery_crossing.png}\\[2pt]
+{\small \sq{drgteal}~DRG \quad \sq{gigorange}~GIG \quad \sq{magenta}~design \quad \sq{mhcgrey}~MHC groove}
 \end{center}
-\vspace{-2pt}
+{\footnotesize\noindent\textbf{Fig 1.} Design (magenta) vs both registers. Left (recovery): matches DRG
+(top), misses GIG (bottom). Right (cross-reactive): departs GIG (top), crosses into DRG (bottom).\par}
+\vspace{1pt}
 
 {\footnotesize
 \captionof{table}{De novo and control designs, scored against the 310\,K native envelope. Recoveries land in
@@ -101,7 +110,6 @@ Nat.\ Chem.\ Biol.\ 14:934--942 (2018).
 
 \vspace{2pt}
 \noindent\textbf{Availability.}
-Code, the MD-calibrated scorer, campaign drivers, and curated design archives:
-\texttt{github.com/sermare/if-mhc}.
+Code, MD-calibrated scorer, and curated design archives: \texttt{github.com/sermare/if-mhc}.
 
 \end{document}

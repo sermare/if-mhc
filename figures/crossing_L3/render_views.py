@@ -43,7 +43,7 @@ cmd.set("antialias", 2)
 cmd.set("cartoon_transparency", 0.0)
 cmd.set("cartoon_side_chain_helper", 1)
 # labels: float in front, white-outlined for legibility
-cmd.set("label_size", 40)
+cmd.set("label_size", 26)
 cmd.set("label_color", "black")
 cmd.set("label_outline_color", "white")
 cmd.set("float_labels", 1)
@@ -107,7 +107,9 @@ def load_font(sz):
 
 
 def annotate_legend(png, entries, title):
-    """Bake a small colour legend + title into the bottom-left of a PNG (in place)."""
+    """Disabled: the colour key is now drawn once, large, by build_fig2.py (a baked
+    per-panel box shrinks with the panel and overlaps the structure)."""
+    return
     try:
         from PIL import Image, ImageDraw
     except Exception:

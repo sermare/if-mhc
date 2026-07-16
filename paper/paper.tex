@@ -8,6 +8,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{xcolor}
+\definecolor{drgteal}{RGB}{0,191,191}
+\definecolor{gigorange}{RGB}{255,128,0}
+\definecolor{mhcgrey}{RGB}{160,160,160}
+\newcommand{\sq}[1]{\textcolor{#1}{\rule{1.4ex}{1.4ex}}}
 
 \frenchspacing
 \setlength{\pdfpagewidth}{8.5in}
@@ -250,16 +255,20 @@ null-baseline measurement (\S3.6).
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.78\textwidth]{../figures/fig2_recovery_crossing/fig2_recovery_crossing.png}
-\caption{\textbf{Recovery and crossing are register-specific, not generic proximity.} Each row is one
-design shown against both conformations, establishing that the match to its reported conformation is not
-simply ``close to either.'' Top row: the recovering design (magenta) is 1.07\AA{} from its own target DRG
-(teal, left) but 2.75\AA{} from the non-target GIG (orange, right) --- inside the 310K DRG acceptance band
-(\S2.4). Bottom row: the closest de-novo crossing design (magenta) is 3.02\AA{} from its own cognate GIG
-(teal, left) --- the conformation it was \textit{not} trying to match --- but 1.44\AA{} from the DRG
-conformation it crossed into (orange, right; 1.03\AA{} to the single closest individual MD frame, discussed
-below), within the DRG band's 95\% confidence interval. Both designs sit substantially closer to the
-conformation they are credited with matching than to the alternative.}
+\makebox[0.39\textwidth][c]{\large\bfseries RECOVERY}\makebox[0.39\textwidth][c]{\large\bfseries CROSS-REACTIVE}\\[3pt]
+\includegraphics[width=0.78\textwidth]{../figures/fig2_recovery_crossing/fig2_recovery_crossing.png}\\[4pt]
+{\normalsize \sq{drgteal}~DRG \quad \sq{gigorange}~GIG \quad \sq{magenta}~design \quad \sq{mhcgrey}~MHC groove}
+\caption{\textbf{Recovery and crossing are register-specific, not generic proximity.} Each design is shown
+against both conformations, establishing that the match to its reported conformation is not simply ``close
+to either.'' \textbf{Left column (RECOVERY):} the recovering design (magenta) is 1.07\AA{} from its own
+target DRG (teal, top) but 2.75\AA{} from the non-target GIG (orange, bottom) --- inside the 310K DRG
+acceptance band (\S2.4). \textbf{Right column (CROSS-REACTIVE):} the closest de-novo crossing design
+(magenta) is 3.02\AA{} from its own cognate GIG (orange, top) --- the conformation it was \textit{not}
+trying to match --- but 1.44\AA{} from the DRG conformation it crossed into (teal, bottom; 1.03\AA{} to the
+single closest individual MD frame, discussed below), within the DRG band's 95\% confidence interval. Both
+designs sit substantially closer to the conformation they are credited with matching than to the
+alternative. Colour key (consistent across all panels): DRG teal, GIG orange, design magenta, MHC groove
+grey.}
 \label{fig:recovery-crossing}
 \end{figure*}
 
