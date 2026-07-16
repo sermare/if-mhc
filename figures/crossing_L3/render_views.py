@@ -43,7 +43,7 @@ cmd.set("antialias", 2)
 cmd.set("cartoon_transparency", 0.0)
 cmd.set("cartoon_side_chain_helper", 1)
 # labels: float in front, white-outlined for legibility
-cmd.set("label_size", 18)
+cmd.set("label_size", 40)
 cmd.set("label_color", "black")
 cmd.set("label_outline_color", "white")
 cmd.set("float_labels", 1)
@@ -113,7 +113,7 @@ def annotate_legend(png, entries, title):
     except Exception:
         return
     im = Image.open(png).convert("RGB"); d = ImageDraw.Draw(im)
-    f, ft = load_font(19), load_font(17)
+    f = ft = load_font(38)   # single uniform legend font size
 
     def tlen(s, fo):
         try:
@@ -121,7 +121,7 @@ def annotate_legend(png, entries, title):
         except Exception:
             return int(fo.getbbox(s)[2])
 
-    pad, sw, gap, lh = 10, 22, 8, 27
+    pad, sw, gap, lh = 16, 40, 14, 52
     tw = max([tlen(l, f) for _, _, l in entries] + [tlen(title, ft)])
     bw = pad + sw + gap + tw + pad
     bh = pad + lh * (len(entries) + 1) + pad
@@ -197,13 +197,13 @@ def figure_A():
     
     # Hide cognate (cyan), show other (orange) and design (magenta)
     cmd.hide("everything", "native_cog")
-    for obj, col in [("native_oth", "orange"), ("design", "magenta")]:
+    for obj, col in [("native_oth", "teal"), ("design", "magenta")]:
         s = obj + " and chain " + PEP_CHAIN
         cmd.show("cartoon", s); cmd.show("sticks", s); cmd.color(col, s); util.cnc(s)
     
     cmd.set_view(base_view_flipped)
     entries = [("swatch", (229, 229, 229), "MHC groove (%s)" % COGNATE_PID),
-               ("swatch", (255, 128, 0), "other %s" % OTHER_NAME),
+               ("swatch", (0, 191, 191), "other %s" % OTHER_NAME),
                ("swatch", (255, 0, 255), "design"),
                ("text",   None, "labels: N-term / C-term / F-pocket")]
     do_single_view("no_cog", "el45_az180", [], "el45/az180 (no %s)" % COGNATE_NAME, entries)
@@ -217,13 +217,13 @@ def figure_B():
     
     # Hide other (orange), show cognate (cyan) and design (magenta)
     cmd.hide("everything", "native_oth")
-    for obj, col in [("native_cog", "teal"), ("design", "magenta")]:
+    for obj, col in [("native_cog", "orange"), ("design", "magenta")]:
         s = obj + " and chain " + PEP_CHAIN
         cmd.show("cartoon", s); cmd.show("sticks", s); cmd.color(col, s); util.cnc(s)
     
     cmd.set_view(base_view_flipped)
     entries = [("swatch", (229, 229, 229), "MHC groove (%s)" % COGNATE_PID),
-               ("swatch", (0, 191, 191), "cognate %s" % COGNATE_NAME),
+               ("swatch", (255, 128, 0), "cognate %s" % COGNATE_NAME),
                ("swatch", (255, 0, 255), "design"),
                ("text",   None, "labels: N-term / C-term / F-pocket")]
     do_single_view("no_oth", "el45_az180", [], "el45/az180 (no %s)" % OTHER_NAME, entries)
@@ -252,14 +252,14 @@ def figure_C():
 
     
     # Show all three peptides
-    for obj, col in [("native_cog", "teal"), ("native_oth", "orange"), ("design", "magenta")]:
+    for obj, col in [("native_cog", "orange"), ("native_oth", "teal"), ("design", "magenta")]:
         s = obj + " and chain " + PEP_CHAIN
         cmd.show("cartoon", s); cmd.show("sticks", s); cmd.color(col, s); util.cnc(s)
     
     cmd.set_view(base_view_el30)
     entries = [("swatch", (240, 240, 240), "MHC groove (%s) [faint]" % COGNATE_PID),
-               ("swatch", (0, 191, 191), "cognate %s" % COGNATE_NAME),
-               ("swatch", (255, 128, 0), "other %s" % OTHER_NAME),
+               ("swatch", (255, 128, 0), "cognate %s" % COGNATE_NAME),
+               ("swatch", (0, 191, 191), "other %s" % OTHER_NAME),
                ("swatch", (255, 0, 255), "design"),
                ("text",   None, "labels: N-term / C-term / F-pocket")]
     do_single_view("el30_all3", "el30_az000", [], "el30/az000 (all 3 peptides)", entries)
@@ -274,13 +274,13 @@ def figure_D():
     cmd.set("transparency", 0.95, "mhc_surf")  # very faint - 85% transparent
     
     # Show only other and design
-    for obj, col in [("native_oth", "orange"), ("design", "magenta")]:
+    for obj, col in [("native_oth", "teal"), ("design", "magenta")]:
         s = obj + " and chain " + PEP_CHAIN
         cmd.show("cartoon", s); cmd.show("sticks", s); cmd.color(col, s); util.cnc(s)
     
     cmd.set_view(base_view_el30)
     entries = [("swatch", (240, 240, 240), "MHC groove (%s) [faint]" % COGNATE_PID),
-               ("swatch", (255, 128, 0), "other %s" % OTHER_NAME),
+               ("swatch", (0, 191, 191), "other %s" % OTHER_NAME),
                ("swatch", (255, 0, 255), "design"),
                ("text",   None, "labels: N-term / C-term / F-pocket")]
     do_single_view("el30_oth", "el30_az000", [], "el30/az000 (only other)", entries)
@@ -294,13 +294,13 @@ def figure_E():
     cmd.set("transparency", 0.95, "mhc_surf")  # very faint - 85% transparent
     
     # Show only cognate and design
-    for obj, col in [("native_cog", "teal"), ("design", "magenta")]:
+    for obj, col in [("native_cog", "orange"), ("design", "magenta")]:
         s = obj + " and chain " + PEP_CHAIN
         cmd.show("cartoon", s); cmd.show("sticks", s); cmd.color(col, s); util.cnc(s)
     
     cmd.set_view(base_view_el30)
     entries = [("swatch", (240, 240, 240), "MHC groove (%s) [faint]" % COGNATE_PID),
-               ("swatch", (0, 191, 191), "cognate %s" % COGNATE_NAME),
+               ("swatch", (255, 128, 0), "cognate %s" % COGNATE_NAME),
                ("swatch", (255, 0, 255), "design"),
                ("text",   None, "labels: N-term / C-term / F-pocket")]
     do_single_view("el30_cog", "el30_az000", [], "el30/az000 (only cognate)", entries)

@@ -43,7 +43,7 @@ cmd.set("antialias", 2)
 cmd.set("cartoon_transparency", 0.0)
 cmd.set("cartoon_side_chain_helper", 1)
 # labels: float in front, white-outlined for legibility
-cmd.set("label_size", 18)
+cmd.set("label_size", 40)
 cmd.set("label_color", "black")
 cmd.set("label_outline_color", "white")
 cmd.set("float_labels", 1)
@@ -113,7 +113,7 @@ def annotate_legend(png, entries, title):
     except Exception:
         return
     im = Image.open(png).convert("RGB"); d = ImageDraw.Draw(im)
-    f, ft = load_font(19), load_font(17)
+    f = ft = load_font(38)   # single uniform legend font size
 
     def tlen(s, fo):
         try:
@@ -121,7 +121,7 @@ def annotate_legend(png, entries, title):
         except Exception:
             return int(fo.getbbox(s)[2])
 
-    pad, sw, gap, lh = 10, 22, 8, 27
+    pad, sw, gap, lh = 16, 40, 14, 52
     tw = max([tlen(l, f) for _, _, l in entries] + [tlen(title, ft)])
     bw = pad + sw + gap + tw + pad
     bh = pad + lh * (len(entries) + 1) + pad

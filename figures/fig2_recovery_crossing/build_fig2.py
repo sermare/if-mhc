@@ -39,10 +39,10 @@ def load_font(sz):
     return ImageFont.load_default()
 
 
-f = load_font(15)
+f = load_font(34)
 ims = [Image.open(p).convert("RGB") for p, _ in PANELS]
 cw, ch = ims[0].width, ims[0].height
-pad_top = 24
+pad_top = 48
 ncols = nrows = 2
 canvas = Image.new("RGB", (cw * ncols, (ch + pad_top) * nrows), (255, 255, 255))
 d = ImageDraw.Draw(canvas)
