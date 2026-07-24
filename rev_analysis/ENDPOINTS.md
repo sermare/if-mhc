@@ -140,3 +140,42 @@ groove-resident reverse designs. 3.4 headline SURVIVES; restate 4 with the physi
 
 All gates (extended/forward/RMSD-groove/physical-groove/register_defined) now pinned in pool.py with a
 printed cross-tab; every round-2..5 number regenerates from that one file.
+
+---
+## ROUND-6 CORRECTIONS
+
+**max old == new: identical 37-residue set** -> old-max evidence bears on the current cell.
+
+**Old max is NOT zero (correcting round-5).** A fresh rescore of ~90 old max-conditioned designs on disk
+= 1/90 strict at 310K, best toDRG 1.07A (same best as new max). Weak, underpowered (UB 6%), but nonzero and
+CONSISTENT with new max 4/1201 -> mild POSITIVE cross-campaign support. maxrep is the powered test.
+(The round-5 "old 0/52" used a 52-row CSV subset that missed this design; disk rescore is authoritative.)
+
+**(4) report BOTH gates; RMSD-groove is PRIMARY.** RMSD-groove (directional): denovo 47.6% vs null 20.7%,
+ratio 2.3x, within-gate median min-RMSD 3.98A (clean). Physical-groove (non-directional): 89.7% vs 20.5%,
+ratio 4.4x, but within-gate median 7.28A / p90 15.78A / only 51% <8A -> ADMITS poorly-folded backbones,
+overstates placement. Lead with 2.3x (clean); report 4.4x as the permissive non-directional bound.
+
+**3.4 mirror-image claim WEAKENED symmetrically.** The physical gate that "rescues" reverse-in-groove
+(7,568) also admits junk (median 7.28A), so those are mostly structurally-poor, not clean mirror images.
+No gate cleanly isolates "well-formed N-term-in-F-pocket". Transferable claim survives only in the weaker
+form: ~half of de-novo backbones are not RMSD-close to a forward native and F-pocket argmin labels them
+reverse; clean-mirror vs junk is unresolved without a reverse reference.
+
+**max 52x is NOT resolved.** Only the hit-independent 2.0A threshold is honest: ~3.1x. 1.58A (21x) and
+1.48A (inf) are circular (= the hit definition). P(anchor|<=1.48)=4/4 (the hits themselves). Defensible
+sentence: "modest, threshold-dependent proximity advantage (~3x at 2.0A) that steepens near the acceptance
+band, where counts (4 vs 1) are too small to characterize." Not "resolved."
+
+**maxrep DECISION RULE -> 6AMU ARM ONLY.** Effect is crystal-specific: 6AMU 4/600 = 0.667%
+[0.18-1.70], 6AM5 0/601 (Fisher p=0.062, suggestive not established). Rule: HOLDS if fresh 6AMU strict
+rate lower-CI > 0.006%; FAILS if upper-CI < 0.667%; else indeterminate. 6AM5 is a separate descriptive arm.
+
+**Redirection = n=1 (strict).** Corpus strict = 4 recovery + 1 crossing; max contributes 0 crossings. The
+entire redirection result is ONE design in 16,919. Abstract must say so ("redirection observed once in
+16,919 draws"); the "Recovering and Redirecting" title oversells the n=1 half.
+
+**Ablation endpoint = register-coordinate DISTRIBUTION (powered), tail count secondary.** register coord
+(toGIG-toDRG) on register_defined: max median +0.70 (p10 -0.43) vs other +0.59 (p10 -0.51); MWU max>other
+p<0.001 -- a small but significant DRG-ward shift at n=559 vs 3126. Use median/p10/shift for the ablation;
+if it still can't discriminate, say so rather than run it for form.
