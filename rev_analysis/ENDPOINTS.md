@@ -56,3 +56,20 @@ Null result = cross arm never diverges from own arm ⇒ conditioning cannot redi
 **Primary:** groove-placement + DRG hit rate vs the T=30 baseline (`max` condition).
 **Prediction:** noise_scale=0 raises in-silico success rate at the cost of diversity; T=50 vs T=30 modest.
 Ablative, not mechanistic.
+
+---
+## max-replication DECISION RULE (committed before cells land)
+Pooled other-cell rate = (11-7)/(16919-1201) = 4/15718 = **0.025%**. Original `max` = 7/1201 = 0.58%.
+- **HOLDS**  if fresh-seed maxrep rate's 95% CI **lower** bound > 0.025% (exceeds background).
+- **FAILS**  if its 95% CI **upper** bound < 0.58% (regresses below the original point estimate).
+- **INDETERMINATE** otherwise. Report per crystal (max hits split 6AMU 5 / 6AM5 2, so both must be read).
+Prior: the 18-contact cell was special in the old corpus (C18 1.61%) but ordinary in the new (k18 0.083%)
+-> cross-campaign top-cell effects have not replicated here; a null replication is the expected outcome.
+
+## max-ABLATION (direct test of 3: composition vs coverage) -- runs ALONGSIDE maxrep
+`max` is a strict superset of L5_max/k24/k18/k14; k24(24)=0/1203 while max(42)=7/1201, so it is NOT a
+monotone coverage threshold. `max` has 12-16 residues (per crystal) in no other scheme.
+- **max_drop12** (max minus its unique residues, ~25-30 left): primary = DRG hit rate.
+  Prediction: if COMPOSITION, regresses toward k24 (~0%); if COVERAGE, stays ~0.58%.
+- **max_uniq12** (only the unique residues as hotspots): primary = DRG hit rate + groove placement.
+  Prediction: if those residues carry the effect, elevated over background; else ~0.
