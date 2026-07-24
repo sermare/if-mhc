@@ -129,6 +129,7 @@ outputs/rfd_null/
 # reviewer-driven re-analysis working dir (scripts tracked, caches/env not)
 !rev_analysis/
 !rev_analysis/*.py
+!rev_analysis/*.md
 rev_analysis/mdenv/
 rev_analysis/*.pkl
 rev_analysis/*.npz
