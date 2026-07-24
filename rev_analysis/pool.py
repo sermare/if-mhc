@@ -42,6 +42,15 @@ def load(aug=True):
     if "groove" not in DF:
         DF["groove"] = DF[["toGIG", "toDRG"]].min(1) < GROOVE_CUT
     DF["forward"] = DF.thread == "forward"
+    # PHYSICAL groove (non-directional): peptide centroid near the groove center (both natives occupy it).
+    # Distinct from `groove` (RMSD<8A to a forward native), which is directional by construction.
+    try:
+        Z = np.load(f"{RA}/design_coords.npz"); Cc = Z["coords"]; G = Z["GIG"]; D = Z["DRG"]
+        if len(Cc) == len(DF):
+            gc = (G.mean(0) + D.mean(0)) / 2
+            DF["phys_groove"] = np.linalg.norm(Cc.mean(1) - gc, axis=1) < 6.5   # native max 0.5A + 6
+    except Exception:
+        pass
     DF["register_defined"] = DF.extended & DF.groove & DF.forward
     NCON = contact_counts()
     DF["ncon"] = DF.cond.map(lambda c: NCON.get(c, dict(n=np.nan))["n"])
@@ -73,6 +82,14 @@ if __name__ == "__main__":
     print(f"    REGISTER_DEFINED    : {len(rd)}  <- inclusion rule for all register analyses")
     print(f"  de-novo hits (DRG CI) : recovery {int(dn.recovery.sum())}, crossing {int(dn.crossing.sum())}, "
           f"total {int(dn.hit.sum())}")
+    print(f"  GATE CROSS-TAB (de-novo, all gates pinned here):")
+    print(f"    extended        {dn.extended.sum():5d} ({100*dn.extended.mean():.1f}%)")
+    print(f"    forward         {dn.forward.sum():5d} ({100*dn.forward.mean():.1f}%)")
+    print(f"    RMSD-groove(<8) {dn.groove.sum():5d} ({100*dn.groove.mean():.1f}%)  [DIRECTIONAL by construction]")
+    if "phys_groove" in dn:
+        print(f"    PHYSICAL-groove {dn.phys_groove.sum():5d} ({100*dn.phys_groove.mean():.1f}%)  [non-directional]")
+        print(f"    reverse & phys-groove {int((dn.phys_groove & ~dn.forward).sum()):5d}  vs reverse & RMSD-groove {int((dn.groove & ~dn.forward).sum()):5d}")
+    print(f"    register_defined {dn.register_defined.sum():5d} ({100*dn.register_defined.mean():.1f}%) = extended&RMSD-groove&forward")
     print(f"  contact-count tiers (de-novo cells):")
     nc = dn.groupby('cond').agg(N=('hit','size'), ncon=('ncon','first'), hits=('hit','sum')).sort_values('ncon')
     print(nc.to_string())

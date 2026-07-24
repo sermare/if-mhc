@@ -109,3 +109,34 @@ slippage 55.7% vs 0% floor at n>1200 -> unassailable.
 **(5) corrected:** contact-only MEDIAN (register-defined) = 4.08 A vs fix2 = 2.43 A. So fix2 IS better
 than contact-only (register supply starts at fix2, not fix4); the earlier "fix2 buys threading only" mixed
 a median against a best-of-N floor and is withdrawn.
+
+---
+## ROUND-5 CORRECTIONS (committed before maxrep/ablation land)
+
+**k18 "non-replication" prior RETRACTED -- it was a band artifact.** Old k18 (186 designs) rescored
+under the CURRENT 310K DRG definition = 0 strict / 0 CI (best toDRG 1.85A). Old max (52) = 0/52, old
+k24 = 0/52 -- EVERY old cell is 0 at 310K strict. The old "1.61%" was under 370K wider bands; the old
+"hits" were DRG-crossings at 1.85-2.24A that fail the 310K bands. Old campaigns sampled only 52-186/cell,
+underpowered to see a 0.3% effect. => No cross-campaign contradiction; maxrep expectation is **NEUTRAL**
+(it is the first adequately-powered measurement, not a regression test).
+
+**`max` 52x gap RESOLVED (proximity, threshold-dependent).** Enrichment of P(toDRG<=t): 2.5A 2.8x,
+2.0A 3.1x, 1.58A 21.2x, 1.48A inf. Measuring at 2.5A (1.7x) understated it. P(anchor P9 | <=1.48)=1.00
+-> anchor is not the bottleneck; `max` is special at DRG-PROXIMITY, ~21x at <=1.58A. Real steering signal.
+
+**`max` strict hits = 4/1201, ALL 6AMU (recovery), 0 crossing, across 4 distinct batches.** So `max`
+enables DRG RECOVERY, not redirection; not a single-batch artifact.
+
+**ENDPOINT = register coordinate (toGIG - toDRG), register-specific.** Absolute <2.5A is NOT
+register-specific (2.87A separation). regcoord>1.5: max 0.89% (5/559) vs other 0.03% (1/3126), ~28x.
+CAVEAT: register-specific tail mass is rare (~4-7 events at n=600) -> the ablation is UNDERPOWERED for the
+register question; that rarity is itself the finding. Report register-coordinate distribution + toDRG<=1.58
+count (register-specific at 2.87A separation); hit count secondary.
+
+**PHYSICAL groove gate pinned (pool.py), non-directional.** denovo physical-groove 89.7% vs null 20.9%
+(stronger, non-directional placement result for 4). reverse & physical-groove = 7568 (vs 130 under the
+directional RMSD gate) -> 3.4's mirror-image reverse population is REAL and large; the RMSD gate was hiding
+groove-resident reverse designs. 3.4 headline SURVIVES; restate 4 with the physical (non-directional) gate.
+
+All gates (extended/forward/RMSD-groove/physical-groove/register_defined) now pinned in pool.py with a
+printed cross-tab; every round-2..5 number regenerates from that one file.
