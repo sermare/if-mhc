@@ -6,6 +6,7 @@
 !README.md
 !MAIN_CLAIMS.md
 !ANALYSIS_WALKTHROUGH.md
+!UPDATE.md
 
 # analysis notebooks (flat directory; do not sweep in vendored
 # RFdiffusion/ProteinMPNN example notebooks)
