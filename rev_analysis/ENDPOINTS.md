@@ -179,3 +179,26 @@ entire redirection result is ONE design in 16,919. Abstract must say so ("redire
 (toGIG-toDRG) on register_defined: max median +0.70 (p10 -0.43) vs other +0.59 (p10 -0.51); MWU max>other
 p<0.001 -- a small but significant DRG-ward shift at n=559 vs 3126. Use median/p10/shift for the ablation;
 if it still can't discriminate, say so rather than run it for form.
+
+---
+## ROUND-7 CORRECTIONS
+
+**BATCH-CONFOUND BRIDGE CONTROL (free) -- verdict IS interpretable.** New maxrep register-coordinate
+distribution (groove&forward, per crystal) matches old max: 6AMU new median +0.46 vs old +0.32 (MWU p=0.15);
+6AM5 new +0.76 vs old +0.64 (p=0.51). NO downward batch shift -> the 0/463 hit absence is genuine
+non-replication of the tight-band hit, NOT a batch artifact. (The ablation -0.45 is therefore a real hotspot
+effect, not drift.)
+
+**Near-misses carry the story.** New maxrep 6AMU P9-seated: best toDRG 1.54A, #<=1.48=0, <=1.58=1, <=1.8=4.
+The register-coordinate DISTRIBUTION replicates; only the rare tight-band hit does not. Report the near-miss
+distribution, not just the binary call (the band sits 0.02A from the data).
+
+**"FAILS" reframed (winner's curse).** 0/600 -> upper CI 0.61% rules out the ORIGINAL 0.667% point estimate,
+NOT the effect; a true rate ~0.3% (still ~50x background) is not excluded. `max` was the max of ~14-40
+cells -> selected maxima are upward-biased. Honest statement: "max does not replicate at its originally
+observed rate; a smaller effect is not excluded." Report the POOLED estimate (old+new combined) and Fisher
+(4/600 vs 0/600, p~0.06), not the replication verdict alone.
+
+**Protocol note (for the record):** a partial-N interim read (maxrep 463/512) was taken and used to shape
+expectations. The decision rule was fixed in advance and no stopping decision was made on it, but this is a
+departure from "score only at min-N" and is logged here for transparency.
