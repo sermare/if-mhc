@@ -288,3 +288,40 @@ ranked list). So the own-vs-cross basin-occupancy difference vs partial_T isolat
 conclusions (seed-echo identity-map; fix-motif ladder, already in per_design.csv) are the complete local
 record. No additional scoreable partial_T designs exist locally; the graded crossing curve is exp_partial
 (pending generation), which is starved on lowprio at this writing.
+
+---
+## ROUND-9: 5-gate framework, paired partial diffusion, guide-potential fix
+
+**5-GATE SCORER (rev_analysis/gate5.py) is now the standard readout for every arm.** Gates: (1) direction
+(forward/reverse), (2) placement (RMSD-groove strict + physical permissive, both ratios), (3) phase
+(offset-slippage vs the fix8 same-pipeline floor, not MD frames), (4) register coordinate d(GIG)-d(DRG)
+continuous (primary), (5) effect size (AUC/Cliff's delta next to every p). Binary hit counts are never the
+endpoint.
+
+**Template-identity ladder, 5-gate readout (which peptide residues templated; all 100% fwd & groove):**
+| arm | phase-slip | to-own med (fwd) | best | vs fix8 (AUC) |
+|---|---|---|---|---|
+| ti_mid2 (P5-6) | **0%** | **1.44A** | 0.61 | 0.975 (worse) |
+| ti_cterm2 (P9-10) | 12% | 2.79A | 1.28 | 1.000 (worse) |
+| ti_cterm1 (P10) | 12% | 3.02A | 1.46 | -- |
+| ti_nterm2 (P1-2) | 24% | 3.41A | 1.39 | 1.000 (worse) |
+| fix8 (ref) | 0% | 0.41A | 0.10 | -- |
+Findings: (a) NO 2-residue templating reaches fix8 (all AUC~1.0 worse); anchor-only is far from sufficient.
+(b) Templating the MIDDLE (P5-6) fixes phase (0% slip) and is the best 2-residue arm; templating an END
+leaves 12-24% phase-slippage. Register recovery is about geometric leverage (central anchoring), NOT the
+z-profile's C-terminal information locality. Contradicts the naive "anchor-only is enough" expectation.
+
+**PAIRED partial diffusion (bug fixed).** The prior unpaired design gave own/cross DIFFERENT RNG draws ->
+at 1-4% effect sizes, noise dominates conditioning. Fixed: jobs/exp_partial_paired.sh runs each arm as ONE
+inference.deterministic=True num_designs=24 job, so own-design-i and cross-design-i share seed i (RFdiffusion
+seeds make_deterministic(i_des) by index) and differ ONLY in ppi.hotspot_res. partial_T in {2,5,10,15,20,25,
+30} (low end catches the identity-map regime; dense 15-30). PRIMARY = paired own-vs-cross basin-occupancy
+difference vs partial_T. Same seed crystal both arms (verified). Submitted.
+
+**Guide potential INDEXING FIXED + instrumented.** Bug: RFdiffusion convention is binder(peptide)-FIRST
+(xyz[:binderlen]) with hotspot_res offset by binderlen (see binder_distance_ReLU); my peptide-last/no-offset
+version pulled the wrong residue (anchor at P4-P7, designs 13-16A). Corrected: anchor = xyz[binderlen-1]
+(peptide C-term), target = Ca[hotspot_res+binderlen]. Added one-time print of L/binderlen/anchor_idx and
+d(Nterm,target)/d(Cterm,target) to VERIFY layout at runtime. Guide_scale swept {1,5,15} with quadratic
+decay. VALIDATION LADDER before believing it: (1) neutral at fix8, (2) recovers fix10 0.07, (3) concurrent
+de novo control same batch, (4) paired, (5) pre-registered min-N. Small validation running.
