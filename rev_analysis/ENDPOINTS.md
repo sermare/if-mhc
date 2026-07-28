@@ -202,3 +202,58 @@ observed rate; a smaller effect is not excluded." Report the POOLED estimate (ol
 **Protocol note (for the record):** a partial-N interim read (maxrep 463/512) was taken and used to shape
 expectations. The decision rule was fixed in advance and no stopping decision was made on it, but this is a
 departure from "score only at min-N" and is logged here for transparency.
+
+---
+## exp_partial PRE-REGISTRATION (committed BEFORE the scorer is wired / any cell scored)
+Scorer: py/score_q30_basins.py (per-design toGIG/toDRG in the 6AMU groove frame -> basin occupancy).
+**PRIMARY endpoint = the DIFFERENCE between the own-register and cross-register conditioning arms in
+target-basin occupancy, as a function of partial_T.** Single-arm occupancy is uninformative (low partial_T
+recovers the seed by construction; high partial_T degrades to de novo). Steering signal = cross-arm occupancy
+of the TARGET (alternate) basin rising above the own-arm control at matched partial_T.
+**IDENTIFIABILITY CHECK (explicit):** seed native DRG, LOW partial_T, DRG-side conditioning. If the model
+cannot hold DRG under its own conditioning at low partial_T, there is no DRG basin to steer into -- which
+would explain every negative in the project. Report this before any crossing claim.
+**Sampling range:** the prior seed-echo result (toGIG 0.07, zero variance = identity map, likely partial_T
+too low) says the frozen regime is uninformative. Sample DENSELY where output starts to move -- ~15-30 --
+not the frozen low end. Report per partial_T with n and CI; score only at each cell's min-N.
+
+---
+## ROUND-8 CORRECTIONS
+
+**Ablation is NEGLIGIBLE, not "composition" (report effect size, not p).** On the register coordinate,
+register-defined, every contrast moves the coordinate by single-digit % of the 2.87A inter-conformation
+separation, and AUC ~ 0.5:
+| contrast | AUC | Cliff's delta | dMedian | % of 2.87A | p |
+|---|---|---|---|---|---|
+| breadth rich vs sparse | 0.523 | +0.047 | +0.032A | 1.1% | 0.002 |
+| max vs other-rich | 0.571 | +0.141 | +0.105A | 3.7% | <1e-4 |
+| drop12 vs max | 0.454 | -0.092 | -0.057A | 2.0% | 0.017 |
+UNIFYING STATEMENT (replaces "breadth doesn't matter"): *contact conditioning moves the register coordinate
+by single-digit percentages of the distance separating the two conformations, regardless of composition or
+coverage.* Every p is a statement about n (thousands), not effect size. The batch-shift concern is
+WITHDRAWN (it was built on the wrong-population -0.45/-0.43; register-defined shows no shift). Binary
+ablation (3/720 vs 0/786) remains EXPLORATORY.
+
+**maxrep POOLED (the number for the record).** original 6AMU 4/600=0.67%, replication 1/611=0.16%, Fisher
+p=0.21 (NOT a significant regression). POOLED both campaigns = 5/1211 = 0.41% [CP 0.13-0.96%] vs pooled-other
+~0.006%. Report pooled + state `max` was the selected max of ~40 cells (upward-biased). Near-misses
+straddle the band (best P9-seated toDRG: maxrep 1.26/1.54/1.67; uniq12 1.27/1.38/1.45/1.49): the binary
+dichotomizes a dense continuum -- report the near-miss distribution alongside every count.
+
+**CANONICAL fix ladder (Table 7) -- per crystal x FORWARD-only; retires the 4 floating fix0 values
+(14.1 / 13.34 / 3.64 / 7.48-15.43).**
+| rung | 6AM5 fwd% | 6AM5 med | 6AMU fwd% | 6AMU med |
+|---|---|---|---|---|
+| fix0 | 49% | 3.87A | 49% | 3.42A |
+| fix2 | 100% | 2.48A | 100% | 2.38A |
+| fix4 | 100% | 2.02A | 100% | 2.06A |
+| fix6 | 100% | 1.22A | 100% | 0.92A |
+| fix8 | 100% | 0.43A | 100% | 0.40A |
+Ladder is PER SCAFFOLD (6AM5 != 6AMU at fix6/fix8); fix0's 49% forward is the bimodality. State per scaffold.
+
+**Prior partial_T work (agent-verified).** 8 earlier partial_T campaigns existed (pd_sweep, submit_pd_sweep,
+q30 x2, md_seeds, marathon, cross, cross2, focus) but ALL ran on the remote /home/ubuntu cloud host and were
+NEVER synced; no design PDBs are local (verified). Remote UNREACHABLE (15s check). Surviving value: which
+partial_T to sample + score_q30_basins.py exists. Seed-echo "freezes to point" (toGIG 0.07) is LIKELY an
+identity-map artifact (zero variance, = fixall 0.07) -> null diagnostic, NOT a finding, pending partial_T
+verification. The genuine graded crossing curve was never completed; exp_partial is the first under frozen defs.
