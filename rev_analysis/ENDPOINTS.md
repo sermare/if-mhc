@@ -325,3 +325,43 @@ version pulled the wrong residue (anchor at P4-P7, designs 13-16A). Corrected: a
 d(Nterm,target)/d(Cterm,target) to VERIFY layout at runtime. Guide_scale swept {1,5,15} with quadratic
 decay. VALIDATION LADDER before believing it: (1) neutral at fix8, (2) recovers fix10 0.07, (3) concurrent
 de novo control same batch, (4) paired, (5) pre-registered min-N. Small validation running.
+
+---
+## ROUND-10: tmplid refined (phase-corrected, per crystal, register coordinate)
+
+**(1) fix4 INVERSION confirmed — position, not count, is the axis.** ti_mid2 (P5-6, TWO central residues):
+6AM5 1.20A, 6AMU 1.82A -- beats fix4 (FOUR residues): 6AM5 2.02A, 6AMU 2.06A, on BOTH crystals. Two central
+residues outperform four ladder residues. State directly: register recovery scales with residue POSITION,
+not count.
+
+**(2) C-terminal failure is GEOMETRY, not phase.** Offset-optimized (phase-corrected) to-own barely moves
+from index-matched: ti_cterm2 6AM5 2.66->2.66A, 6AMU 3.20->2.93A. It does NOT collapse -> C-terminal
+templating gets the geometry genuinely wrong (~2.7A even after phase correction), not merely slipped. The
+"C-term is right but phase-slipped" rescue of the z-profile is REJECTED. Report index-matched AND
+offset-optimized side by side (done).
+
+**(3) anchor criterion is by-construction for cterm2 -- EXCLUDE it when comparing arms.** anchor-pass:
+cterm2 100%/100% (it templates P9-P10 = the tested anchors), vs mid2 97%/56%, nterm2 25%/24%. cterm2 is
+partly scored on its own input; arm comparisons use to-own RMSD + register coordinate, NOT anchor pass.
+
+**(4) register coordinate: "middle=phase, C-term=register" is REFUTED; the middle does BOTH.** regcoord
+(toGIG-toDRG, own-ward = negative for 6AM5/GIG, positive for 6AMU/DRG):
+| arm | 6AM5 (own=GIG) | 6AMU (own=DRG) | sets register? |
+|---|---|---|---|
+| mid2 P5-6 | -1.73 | +1.00 | YES, strongest |
+| cterm2 P9-10 | -0.77 | +1.01 | yes |
+| nterm2 P1-2 | +0.67 (WRONG) | -0.39 (WRONG) | NO -- pushes wrong way |
+mid2 shifts register >= cterm2 AND has better RMSD -> the middle sets register at least as well as the
+C-terminus, not just phase. Refined synthesis: **N-terminal (register-neutral) templating cannot set
+register (consistent with the z-profile); the MIDDLE sets register best via geometric leverage over the
+10-mer; the C-terminus sets register correctly but with worse overall geometry.** The z-profile
+(information: where natives differ) and templating leverage (which position best constrains a generated
+backbone) are different questions; N-term failing to set register reconciles them.
+
+**(7) ONE standard confirmed.** gate5.py uses IDENTICAL gate thresholds to pool.py (E2E 17-30, GROOVE<8,
+register-defined = extended&groove&forward). gate5 is the reusable per-arm applicator of the same
+definitions that produced rounds 2-8; not a second standard.
+
+**Empirical verifications submitted:** (6) partial-diffusion determinism (own-arm x2, design-i bit-identical
+-> pairing real vs nominal); guide potential runtime layout print on full 4-chain context (515-res receptor)
+-> binderlen convention verified where it matters. Both pending GPU.
