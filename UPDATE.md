@@ -113,3 +113,60 @@ The defensible one-line summary the analysis points to: *receptor-side contact c
 a peptide backbone in the MHC groove but does not steer its register; register lives in a spatially confined
 C-terminal signal that only explicit geometry supplies; redirection was observed once in 16,919 designs.*
 Whether to reframe the manuscript around that is a separate decision — not taken here.
+
+---
+
+# SUPERSEDING SUMMARY (rounds 7–8) — the current numbers
+
+The interim figures earlier in this file were corrected in review. These are the numbers of record.
+
+### The one-sentence finding (effect sizes, not p-values)
+On the register coordinate, **every contrast moves it by single-digit percentages of the 2.87 Å that
+separates the two conformations**, with AUC ≈ 0.5 — i.e. contact conditioning barely shifts register,
+regardless of breadth or composition:
+
+| contrast | AUC | Cliff's δ | ΔmedianΔ | % of 2.87 Å | p (n in thousands) |
+|---|--:|--:|--:|--:|--:|
+| breadth: rich vs sparse | 0.523 | +0.047 | +0.032 Å | 1.1% | 0.002 |
+| max vs other-rich | 0.571 | +0.141 | +0.105 Å | 3.7% | <1e-4 |
+| drop12 vs max | 0.454 | −0.092 | −0.057 Å | 2.0% | 0.017 |
+
+Every p reflects n, not size. **Report AUC/Cliff's δ next to every p.** The earlier "composition" reading of
+the ablation is withdrawn — it is negligible; the batch-shift concern is also withdrawn (it was built on a
+wrong-population number). Binary ablation (uniq12 3/720 vs drop12 0/786) is **exploratory only**.
+
+### §3.3 — maxrep, pooled
+Original `max` 6AMU 4/600 = 0.67%; replication 1/611 = 0.16%; **Fisher p = 0.21 (not a significant
+regression).** **Pooled: 5/1,211 = 0.41% [0.13–0.96%]** vs pooled-other ~0.006%. `max` was the selected
+maximum of ~40 cells → the pooled estimate is upward-biased (winner's curse). Best P9-seated designs straddle
+the 1.48 Å band (1.26/1.54/1.67; uniq12 1.27/1.38/1.45) — report the near-miss distribution, not the binary.
+Net: a **modest real effect whose headline rate is selection-inflated** — neither "replicated" nor "failed."
+
+### §3.5 — canonical fix ladder (Table 7), per crystal × forward-only
+Retires the four floating fix0 values (14.1 / 13.34 / 3.64 / 7.48–15.43).
+
+| rung | 6AM5 fwd% | 6AM5 med | 6AMU fwd% | 6AMU med |
+|---|--:|--:|--:|--:|
+| fix0 | 49% | 3.87 Å | 49% | 3.42 Å |
+| fix2 | 100% | 2.48 Å | 100% | 2.38 Å |
+| fix4 | 100% | 2.02 Å | 100% | 2.06 Å |
+| fix6 | 100% | 1.22 Å | 100% | 0.92 Å |
+| fix8 | 100% | 0.43 Å | 100% | 0.40 Å |
+
+Stated **per scaffold** (the crystals differ at fix6/fix8); fix0's 49% forward is the bimodality.
+
+### Prior partial_T work — inventory and status
+Eight earlier partial_T campaigns existed (`pd_sweep`, `submit_pd_sweep`, `q30`×2, `md_seeds`, `marathon`,
+`cross`, `cross2`, `focus`). **All ran on the remote `/home/ubuntu` cloud host and were never synced — no
+design PDBs are local, and the host is unreachable (verified).** Surviving value: which partial_T to sample,
+and that `py/score_q30_basins.py` (a ready basin scorer) exists. The seed-echo "freezes to point" result
+(toGIG 0.07, zero variance = `fixall` 0.07) is **most likely an identity-map artifact** (partial_T too low)
+— a null diagnostic, not a finding. The genuine graded crossing curve was never completed; the current
+`exp_partial` arm is the first under frozen definitions, **pre-registered** (own-vs-cross basin occupancy vs
+partial_T + a DRG-basin identifiability check; sample densely at partial_T ≈ 15–30).
+
+### Manuscript status
+Per the owner's instruction, **the manuscript remains unchanged.** The full negative-result rewrite that the
+review points to was drafted and then reverted at the owner's request; it is recoverable from git history
+(commits `ecba875`, `d710f90`) whenever the owner decides to adopt it. This memo is the annotated record; the
+decision to move it into `paper/paper.tex` is the owner's.
