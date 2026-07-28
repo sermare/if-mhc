@@ -257,3 +257,34 @@ NEVER synced; no design PDBs are local (verified). Remote UNREACHABLE (15s check
 partial_T to sample + score_q30_basins.py exists. Seed-echo "freezes to point" (toGIG 0.07) is LIKELY an
 identity-map artifact (zero variance, = fixall 0.07) -> null diagnostic, NOT a finding, pending partial_T
 verification. The genuine graded crossing curve was never completed; exp_partial is the first under frozen defs.
+
+---
+## ROUND-8 ADDENDUM (precision fixes from review)
+
+**Preserve the SIGN of each contrast; do not collapse into a 0.45–0.57 range.** The AUC<0.5 entry is
+**drop12 vs max = 0.454** (Cliff −0.092): drop12 sits BELOW max on the register coordinate = LESS DRG-like =
+the **composition-EXPECTED** direction (remove the 12 residues → regress toward GIG), NOT a directional
+inversion. All three contrasts point the expected way (rich>sparse +0.047; max>other +0.141; drop12<max
+−0.092); all are trivial in magnitude (1–4% of the 2.87 Å separation). List them with signs, not as a range.
+
+**fix0 is a different KIND of point on the ladder, not the bottom of one curve.** Forward fractions
+confirmed per crystal: fix0 49%/49%, fix2 100%/100%, fix4 100%/100%, fix6 100%/100%, fix8 100%/100%. So even
+after forward-only restriction, the fix0→fix2 step still compares a rung where ~half the population was
+discarded (fix0) against rungs where none was (fix2+); part of that step remains a threading effect. The
+clean geometry dose-response is **fix2→fix8**; fix0 should be annotated separately, not read as continuous
+with it.
+
+**Seed-echo identity-map diagnosis is CIRCUMSTANTIAL, not established.** It rests on toGIG 0.07 with zero
+variance coinciding exactly with fixall (0.07). The airtight check — the actual partial_T from the `.trb`
+plus a direct input-vs-output coordinate diff — is impossible because those runs are remote and unreachable.
+Record it as *likely* identity map (partial_T too low), not proven.
+
+**exp_partial seed-pairing CONFIRMED (the primary endpoint isolates conditioning).** pd{T}_own and
+pd{T}_cross share the identical seed (empty input_pdb → {crystal}_trim.pdb) and identical contig
+(`... C1-10`); they differ ONLY in ppi.hotspot_res (own = own-register ranked list, cross = other-register
+ranked list). So the own-vs-cross basin-occupancy difference vs partial_T isolates conditioning, not seed.
+
+**Other partial_T data — nothing further to present.** The 8-campaign inventory + the two surviving
+conclusions (seed-echo identity-map; fix-motif ladder, already in per_design.csv) are the complete local
+record. No additional scoreable partial_T designs exist locally; the graded crossing curve is exp_partial
+(pending generation), which is starved on lowprio at this writing.
