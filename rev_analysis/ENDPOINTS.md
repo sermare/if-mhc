@@ -365,3 +365,43 @@ definitions that produced rounds 2-8; not a second standard.
 **Empirical verifications submitted:** (6) partial-diffusion determinism (own-arm x2, design-i bit-identical
 -> pairing real vs nominal); guide potential runtime layout print on full 4-chain context (515-res receptor)
 -> binderlen convention verified where it matters. Both pending GPU.
+
+---
+## ROUND-11: tmplid verifications + guide-potential negative + one-standard end-to-end
+
+**nterm2 WRONG-WAY holds on BOTH crystals -- the cleanest z-profile confirmation.** 6AM5 regcoord +0.67
+(own=GIG, own-ward is negative) and 6AMU -0.39 (own=DRG, own-ward is positive) -- BOTH steer register toward
+the ALTERNATE conformation, n=108/49. Sharp statement: templating two residues in the register-NEUTRAL
+N-terminal region does not merely fail to set register, it actively mis-steers toward the wrong
+conformation. Directional error on both scaffolds. Strongest single result in the tmplid set.
+
+**cterm2 geometry-failure CONFIRMED (offset genuinely 0).** Optimal-offset distribution for ti_cterm2 6AM5
+= {0:106, 1:3} -> 97% at offset 0; the search ran, the optimum really is 0. So 2.66->2.66A after offset-opt
+is real: C-terminal templating gets the GEOMETRY wrong (~2.7A), not the phase. The phase-rescue of the
+z-profile is rejected.
+
+**mid2-vs-cterm2 register comparison is SCAFFOLD-SPECIFIC (n=1/crystal).** 6AMU: mid2 +1.00 ~ cterm2 +1.01
+(indistinguishable). 6AM5: mid2 -1.73 vs cterm2 -0.77 (mid2 2.3x larger). The scaffolds disagree on whether
+there is any difference. This is enough to REJECT "cterm2 is better at register"; it is NOT enough to
+establish "the middle sets register best." Report as such.
+
+**Refined tmplid synthesis (final):** N-terminal (register-neutral) templating actively MIS-STEERS register
+on both crystals (z-profile confirmed); the middle sets register and geometry well (best 2-res arm, beats
+fix4); the C-terminus sets register the right direction but with worse geometry. Information (z-profile:
+where natives differ) and leverage (which position constrains a generated backbone) are separate axes;
+nterm2's directional error reconciles them. The mid>cterm register claim is scaffold-specific, not
+established.
+
+**GUIDE POTENTIAL: aim CORRECT, mechanism FAILS.** Runtime instrumentation on full 4-chain context (L=525,
+binderlen=10, anchor_idx=9, F-pocket hot_idx0=86) confirms the peptide-first indexing is now right. But the
+designs are still 12-16A (worse than the de novo floor ~4-11A) at every guide_scale {1,5,15} with quadratic
+decay, anchor mostly mis-seated. A single-coordinate C-term->F-pocket ReLU restraint DEGRADES the backbone
+(yanks one end, the rest flails) -- it does not recover register. Negative result for the mechanism as
+formulated (not an indexing bug this time).
+
+**ONE STANDARD, verified END-TO-END.** gate5.py re-run on the frozen pool reproduces the pool numbers
+exactly: RMSD-groove 47.6% (round-6: 47.6%), register-defined slippage 55.7% (round-6: 55.7%). gate5 and
+pool.py are one standard, not two -- definitional thread closed.
+
+**ActiveSite checkpoint arm: NOT run yet (0 designs); phase1 array kept dying on the starved queue.
+Resubmitted. Partial-paired + determinism check also resubmitted (all were 0).**
