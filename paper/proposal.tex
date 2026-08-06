@@ -43,77 +43,77 @@ CA\quad\textperiodcentered\quad Center for Computational Biology, UC Berkeley\qu
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{../figures/fig2_recovery_crossing/fig2_toprow_proposal.png}
-\caption{\textbf{Proposed framework.} A two-state discrimination test in a cross-reactive pMHC--TCR
-system. Diffusion models sample from the cognate conformation (teal, left) toward a known off-target
-conformation (orange, right), two distinct peptides the same receptor engages. Each generated backbone
-(magenta) is scored against both, and credited only if substantially closer to the one it is claimed to
-match.}
+\caption{\textbf{Proposed framework.} Diffusion models sample from the cognate conformation (teal, left)
+toward a known off-target one (orange, right). Each generated backbone (magenta) is scored against both.}
 \label{fig:framework}
 \end{figure}
 
-\noindent\textbf{The problem.} Engineered T-cell receptor therapies promise a transformative future for
-cancer treatment, and with the 2024 approval of afamitresgene autoleucel that future has begun to
-arrive\footnote{N.\ Singh. Approval of the first TCR-based cell therapy. Mol.\ Ther.\ 32:3195, 2024.}.
-Cross-reactivity stands between that beginning and routine use. An affinity-enhanced MAGE-A3 receptor
-that had cleared extensive preclinical testing killed the first two patients who received it, by
-cross-recognizing a self-peptide from the muscle protein titin sharing five of nine residues with the
-intended target\footnote{G.\ P.\ Linette et al. Cardiovascular toxicity and titin cross-reactivity of
-affinity-enhanced T cells in myeloma and melanoma. Blood 122:863--871, 2013.}. That peptide was
-identified only after both deaths\footnote{B.\ J.\ Cameron et al. Identification of a titin-derived
-HLA-A1-presented peptide as a cross-reactive target for engineered MAGE-A3-directed T cells. Sci.\
-Transl.\ Med.\ 5:197ra103, 2013.}.
+\noindent\textbf{The problem.} TCR-engineering therapies promise a transformative future for cancer
+treatment, and with the 2024 approval of afamitresgene autoleucel that future has begun to
+arrive\footnote{Singh, Mol.\ Ther.\ 32:3195, 2024.}. Yet cross-reactivity remains a fundamental barrier
+to scaling them into personalized medicine. The danger is not hypothetical. An affinity-enhanced MAGE-A3
+receptor that had cleared extensive preclinical testing caused fatal cardiac toxicity in two
+patients\footnote{Linette et al., Cardiovascular toxicity and titin cross-reactivity of affinity-enhanced
+T cells. Blood 122:863--871, 2013.}, cross-recognizing an unrelated self-peptide from the muscle protein
+titin that was identified only after the fact\footnote{Cameron et al., A titin-derived HLA-A1 peptide as
+cross-reactive target for MAGE-A3 T cells. Sci.\ Transl.\ Med.\ 5:197ra103, 2013.}.
 
 \noindent\textbf{Why the field is stuck.} The bottleneck has never been imagination, it has been
-throughput. The space of peptides a human cell can present is on the order of $10^{11}$, so exhaustive
-experimental testing of one receptor against it is not merely expensive but arithmetically out of reach,
-while the aggressive tumors these therapies target leave a clinical window measured in weeks. HLA
-polymorphism compounds this. Measured binding data are sparse for most alleles and sparsest for
-underrepresented populations, precisely the patients personalized therapy is meant to reach, so the
-predictors that might substitute for experiment are weakest where they are needed most. Positional
-scanning mutagenesis, the standard alternative, resolves one receptor against one substitution at a time
-and does not scale to a space combinatorial in both peptide sequence and receptor identity.
+throughput. Experimental validation is slow and costly, an untenable price when the presented peptide
+space is astronomically large, on the order of $10^{11}$, and the fast-growing tumors these therapies
+target leave only a narrow clinical window to act. The extreme polymorphism of HLA leaves binding data
+sparse for most alleles and for underrepresented populations, precisely where personalized therapy is
+needed most. Amino-acid scanning resolves one receptor at a time and does not scale to the combinatorics
+of the peptide--TCR interaction.
 
-\noindent\textbf{The approach.} The tools to test this at scale have only now come within reach. I would
-bring two of my own design. ESMCBA is a binding-affinity predictor built on a protein language model with
-domain adaptation, transferring signal from data-rich to data-scarce HLA alleles and extending coverage
-into the allelic space conventional predictors abandon\footnote{S.\ Mares, A.\ Espinoza, N.\ M.\
-Ioannidis. Continued domain-specific pre-training of protein language models for pMHC-I binding
-prediction. PMLR 311:304--325, 2025.}. The second is a structure-guided generative framework in which
-diffusion models, conditioned on the geometry of the MHC groove, propose peptides compatible with a given
-presentation rather than enumerating them blindly\footnote{S.\ Mares, A.\ Espinoza, N.\ M.\ Ioannidis.
-Generation of structure-guided pMHC-I libraries using diffusion models. ICML GenAI and Biology Workshop,
-2025.}. Inverse-folding models supply the third component, reading a fixed backbone and decoding which
-residues that geometry admits\footnote{H.\ V.\ Ribeiro-Filho et al. Exploring the potential of
-structure-based deep learning approaches for T cell receptor design. PLOS Comput.\ Biol., 2024.}, which
-localizes the positions a receptor reads. Together they generate a candidate off-target set, rank it, and
-localize it (Fig.~\ref{fig:framework}). The instrument is what converts my two tools from proofs of
-concept into a working safeguard.
+\noindent\textbf{The approach.} The tools to test this at scale have only now come within reach. Two
+model classes make it possible. Diffusion models generate backbones by iteratively denoising random
+coordinates into a structure consistent with a supplied context. Inverse folding solves the converse
+problem, encoding each residue's geometric environment as a graph and decoding the sequence most
+compatible with it, learned without any binding measurement\footnote{Ribeiro-Filho et al.,
+Structure-based deep learning for TCR design. PLOS Comput.\ Biol., 2024.}. I would bring two
+complementary tools of my own design built on them. ESMCBA is a binding-affinity system built on protein
+language models with domain adaptation that recovers usable signal even for data-scarce MHC
+alleles\footnote{Mares, Espinoza, Ioannidis, Domain-specific pre-training of protein language models for
+pMHC-I binding. PMLR 311:304--325, 2025.}. The second uses diffusion models conditioned on the MHC groove
+to sample compatible peptides across high-priority alleles\footnote{Mares, Espinoza, Ioannidis,
+Structure-guided pMHC-I libraries using diffusion models. ICML GenAI Biology Wksp, 2025.}. Together they
+let me computationally screen these interactions and chart the cross-reactive neighborhood of a receptor
+before it ever reaches a patient.
 
 \noindent\textbf{How it is proven.} Each prediction is falsifiable at the bench. The receptor either
-engages the flagged peptide or it does not. Validation proceeds in two stages. Retrospectively, the
-screen runs blind against receptors whose off-targets are already documented and must recover them. The
-MAGE-A3 case is the primary test, since the titin epitope is known and was missed by the methods in use
-at the time. A screen that fails to flag it fails outright. Prospectively, top-ranked candidates for a
-panel of characterized receptors go to binding measurement and, for those that bind, to functional assay.
-This yields a quantity the field currently lacks, a false-negative rate for cross-reactivity prediction
-on peptides never seen in training. Both stages apply the same two-state discrimination criterion, so a
-candidate counts only when it sits closer to the off-target conformation than to the cognate one, never
-on generic proximity to the groove. The validation loop is short enough to close within the appointment,
-not left to a successor.
+engages the flagged peptide or it does not. The scoring criterion comes first. Holding MHC and receptor
+fixed and leaving the peptide de novo, generation is conditioned only on receptor-side contacts, sweeping
+their number to locate the breadth at which a target conformation becomes reachable. Each backbone is
+scored on three criteria that must agree, proximity to target, occupancy of the B and F anchor pockets,
+and burial depth, with thresholds calibrated against native molecular-dynamics ensembles of both
+conformations so the envelope has a defined width rather than an arbitrary cutoff
+(Fig.~\ref{fig:framework}). Threading direction is checked explicitly, since a reversed chain scores well
+on deviation alone. In parallel, four inverse-folding models applied to twenty solved pMHC--TCR
+structures, with the receptor present and deleted, identify the positions whose recovery collapses on
+deletion, which are the positions that receptor reads. These are validated against measured mutations
+from SKEMPI and IEDB matched by CDR3, and an architecture-matched variant retrained without MHC and TCR
+structures separates learned chemistry from memorization. Validation then proceeds in two stages.
+Retrospectively, the screen runs blind against receptors whose off-targets are documented and must
+recover them, with MAGE-A3 as the primary test, since the titin epitope is known and was missed by the
+methods then in use. A screen that fails to flag it fails outright. Prospectively, top-ranked candidates
+go to binding measurement and, for binders, to functional assay, yielding what the field lacks, a
+false-negative rate on peptides never seen in training. The loop closes within the appointment.
 
-\noindent\textbf{What becomes possible.} A cross-reactivity screen that runs in silico before infusion
-turns a lethal surprise into a routine preclinical filter, applied to every candidate receptor rather
-than the few that fit an experimental budget, and extended to the allele diversity of real patient
-populations rather than the handful with deep binding data. The same framework generalizes past T-cell
-receptors to any therapy built on engineered molecular recognition, where the failure mode is likewise
-specificity rather than potency. The societal stake is measured in patients, not benchmarks.
+\noindent\textbf{What becomes possible.} A screen that runs in silico before infusion turns
+cross-reactivity from a lethal surprise into a predictable and testable step, applied to every candidate
+receptor rather than the few that fit an experimental budget, and making the next generation of cancer
+therapies measurably safer. It generalizes to any therapy built on engineered molecular recognition,
+where the failure mode is likewise specificity, not potency. The societal stake is measured in patients,
+not benchmarks.
 
 \noindent\textbf{Trajectory.} The first problem is chosen because it is winnable inside a year, the
 second because it is worth a career. Near term the deliverable is the validated screen and its
-false-negative rate. Beyond it lies the harder question the same instrument opens, whether specificity
-can be designed at the outset rather than audited afterward, so that receptors are built against the
-off-target landscape instead of tested against it.
+false-negative rate. Beyond it lies whether specificity can be designed at the outset, not audited
+after.
 
-\noindent Given an instrument of this reach, this is the first thing I would point it at.
+\noindent Recent unpublished work of my own indicates both routes are tractable and that the
+discrimination criterion behaves as intended on real designs, which is what makes this worth building
+now.
 
 \end{document}
