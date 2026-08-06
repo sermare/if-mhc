@@ -66,39 +66,42 @@ sparse for most alleles and for underrepresented populations, precisely where pe
 needed most. Amino-acid scanning resolves one receptor at a time and does not scale to the combinatorics
 of the peptide--TCR interaction.
 
-\noindent\textbf{The approach.} The tools to test this at scale have only now come within reach. Two
-model classes make it possible. Diffusion models generate backbones by iteratively denoising random
-coordinates into a structure consistent with a supplied context. Inverse folding solves the converse
-problem, encoding each residue's geometric environment as a graph and decoding the sequence most
-compatible with it, learned without any binding measurement\footnote{Ribeiro-Filho et al.,
-Structure-based deep learning for TCR design. PLOS Comput.\ Biol., 2024.}. I would bring two
-complementary tools of my own design built on them. ESMCBA is a binding-affinity system built on protein
-language models with domain adaptation that recovers usable signal even for data-scarce MHC
-alleles\footnote{Mares, Espinoza, Ioannidis, Domain-specific pre-training of protein language models for
-pMHC-I binding. PMLR 311:304--325, 2025.}. The second uses diffusion models conditioned on the MHC groove
-to sample compatible peptides across high-priority alleles\footnote{Mares, Espinoza, Ioannidis,
-Structure-guided pMHC-I libraries using diffusion models. ICML GenAI Biology Wksp, 2025.}. Together they
-let me computationally screen these interactions and chart the cross-reactive neighborhood of a receptor
-before it ever reaches a patient.
+\noindent\textbf{The approach.} The tools to test this at scale have only now come within reach. I would
+bring two complementary tools of my own design, and pair them with inverse folding as the third
+component. ESMCBA is a binding-affinity system built on protein language models with domain adaptation
+that recovers usable signal even for data-scarce MHC alleles\footnote{Mares, Espinoza, Ioannidis,
+Domain-specific pre-training of protein language models for pMHC-I binding. PMLR 311:304--325, 2025.}. A
+structure-guided generative framework uses diffusion models conditioned on the MHC groove to sample
+compatible peptides across high-priority alleles\footnote{Mares, Espinoza, Ioannidis, Structure-guided
+pMHC-I libraries using diffusion models. ICML GenAI Biology Wksp, 2025.}. Inverse-folding models, which
+read a fixed backbone and decode the sequences its geometry admits, supply what neither of the first two
+can, namely which peptide positions a given receptor actually reads\footnote{Ribeiro-Filho et al.,
+Structure-based deep learning for TCR design. PLOS Comput.\ Biol., 2024.}. Together they let me
+computationally screen these interactions and chart the cross-reactive neighborhood of a receptor before
+it ever reaches a patient.
 
 \noindent\textbf{How it is proven.} Each prediction is falsifiable at the bench. The receptor either
-engages the flagged peptide or it does not. The scoring criterion comes first. Holding MHC and receptor
-fixed and leaving the peptide de novo, generation is conditioned only on receptor-side contacts, sweeping
-their number to locate the breadth at which a target conformation becomes reachable. Each backbone is
-scored on three criteria that must agree, proximity to target, occupancy of the B and F anchor pockets,
-and burial depth, with thresholds calibrated against native molecular-dynamics ensembles of both
-conformations so the envelope has a defined width rather than an arbitrary cutoff
-(Fig.~\ref{fig:framework}). Threading direction is checked explicitly, since a reversed chain scores well
-on deviation alone. In parallel, four inverse-folding models applied to twenty solved pMHC--TCR
-structures, with the receptor present and deleted, identify the positions whose recovery collapses on
-deletion, which are the positions that receptor reads. These are validated against measured mutations
-from SKEMPI and IEDB matched by CDR3, and an architecture-matched variant retrained without MHC and TCR
-structures separates learned chemistry from memorization. Validation then proceeds in two stages.
-Retrospectively, the screen runs blind against receptors whose off-targets are documented and must
-recover them, with MAGE-A3 as the primary test, since the titin epitope is known and was missed by the
-methods then in use. A screen that fails to flag it fails outright. Prospectively, top-ranked candidates
-go to binding measurement and, for binders, to functional assay, yielding what the field lacks, a
-false-negative rate on peptides never seen in training. The loop closes within the appointment.
+engages the flagged peptide or it does not. Three experiments establish that, in order.
+
+\noindent\textbf{Experiment 1, define the search axes.} Inverse-folding models will be applied to a panel
+of solved pMHC--TCR structures twice, once with the receptor present and once with it removed. Positions
+whose native recovery collapses on removal are the positions that receptor reads, and they define the
+axes along which a cross-reactive peptide may differ. Molecular-dynamics ensembles of each complex,
+rather than the single crystal snapshot, will set how much conformational variation still counts as the
+same presentation, so the tolerance is measured rather than assumed. Predicted read positions will be
+checked against measured mutations from SKEMPI and IEDB matched to each structure's own receptor by CDR3.
+An architecture-matched model retrained without MHC or TCR structures serves as the control separating
+learned interface chemistry from memorized training data.
+
+\noindent\textbf{Experiment 2, retrospective recovery.} The full screen will be run blind on receptors
+whose off-targets are already documented. MAGE-A3 is the primary test, since the titin epitope is known
+and was missed by the methods in use at the time. A screen that fails to rank it fails outright, and this
+is the pass condition for proceeding.
+
+\noindent\textbf{Experiment 3, prospective validation.} Top-ranked candidates for a panel of characterized
+receptors go to binding measurement, and those that bind go to functional assay. The primary deliverable
+is a false-negative rate for cross-reactivity prediction on peptides never seen in training, a quantity
+the field currently lacks. The loop closes within the appointment.
 
 \noindent\textbf{What becomes possible.} A screen that runs in silico before infusion turns
 cross-reactivity from a lethal surprise into a predictable and testable step, applied to every candidate
@@ -112,8 +115,7 @@ second because it is worth a career. Near term the deliverable is the validated 
 false-negative rate. Beyond it lies whether specificity can be designed at the outset, not audited
 after.
 
-\noindent Recent unpublished work of my own indicates both routes are tractable and that the
-discrimination criterion behaves as intended on real designs, which is what makes this worth building
-now.
+\noindent Recent unpublished work of my own indicates both routes are tractable on real pMHC--TCR
+structures, which is what makes this worth building now.
 
 \end{document}
