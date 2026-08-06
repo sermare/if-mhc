@@ -34,6 +34,11 @@
 !paper/aaai.sty
 !paper/aaai.bst
 !paper/fixbib.sty
+
+# self-contained Overleaf bundle for the inverse-folding paper: paper.tex with
+# figure paths rewritten from ../figures/ to figures/, the style files, and only
+# the 21 figures that paper actually embeds. Drag straight into Overleaf.
+!paper/latex.zip
 # ISCB abstract-book submission: 250-word text abstract + single-page print-ready PDF
 !paper/iscb_onepager.tex
 !paper/iscb_onepager.pdf
