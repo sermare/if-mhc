@@ -39,6 +39,11 @@
 # figure paths rewritten from ../figures/ to figures/, the style files, and only
 # the 21 figures that paper actually embeds. Drag straight into Overleaf.
 !paper/latex.zip
+
+# one-page fellowship proposal (TCR cross-reactivity screening)
+!paper/proposal.tex
+!paper/proposal.pdf
+
 # ISCB abstract-book submission: 250-word text abstract + single-page print-ready PDF
 !paper/iscb_onepager.tex
 !paper/iscb_onepager.pdf

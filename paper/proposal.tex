@@ -1,0 +1,111 @@
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{url}
+
+\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\pdfinfo{
+/Title (Predicting TCR Cross-Reactivity Before It Reaches a Patient)
+/Author (Sergio Mares)
+/Keywords (TCR cross-reactivity, pMHC, protein language models, diffusion models, inverse folding, immunotherapy safety)
+}
+\setcounter{secnumdepth}{2}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.07}
+
+\begin{document}
+
+\nocopyright
+\twocolumn[
+\begin{center}
+{\large\bfseries Predicting TCR Cross-Reactivity Before It Reaches a Patient\par}
+\vspace{2pt}
+{\footnotesize Sergio E. Mares\quad\textperiodcentered\quad Adimab, Mountain View, CA\quad
+\textperiodcentered\quad Center for Computational Biology, UC Berkeley\par}
+\vspace{6pt}
+\end{center}
+]
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.82\columnwidth]{../figures/fig2_recovery_crossing/fig2_toprow_proposal.png}
+\caption{\textbf{Proposed framework.} A two-state discrimination test for structure-based peptide design
+in a cross-reactive pMHC--TCR system.}
+\label{fig:framework}
+\end{figure}
+
+\section{Motivation}
+
+TCR-engineering therapies promise a transformative future for cancer treatment, yet cross-reactivity
+remains a fundamental barrier to scaling them into personalized medicine. The danger is not hypothetical:
+an affinity-enhanced MAGE-A3 receptor that had cleared extensive preclinical testing caused fatal cardiac
+toxicity in two patients, cross-recognizing an unrelated self-peptide from the muscle protein titin that
+was identified only after the fact.
+
+Three problems keep this liability beyond the reach of current methods. First, experimental validation is
+slow and costly, an untenable price when the presented peptide space is astronomically large (on the
+order of $10^{11}$, roughly the number of stars in the Milky Way) and the fast-growing tumors these
+therapies target leave only a narrow clinical window to act. Second, the extreme polymorphism of HLA
+leaves binding data sparse for most alleles and for underrepresented populations, precisely where
+personalized therapy is needed most. Third, amino-acid scanning resolves one receptor at a time and does
+not scale to the combinatorics of the peptide--TCR interaction.
+
+\section{Proposed Framework}
+
+I would bring two complementary tools of my own design to this problem: \textbf{ESMCBA}, a
+binding-affinity system built on protein language models with domain adaptation that recovers usable
+signal even for data-scarce MHC alleles (Mares, Espinoza, and Ioannidis 2025a); and a
+\textbf{structure-guided generative framework} that uses diffusion models conditioned on the MHC groove
+to sample compatible peptides across high-priority alleles (Mares, Espinoza, and Ioannidis 2025b).
+Together they let me computationally screen these interactions and chart the cross-reactive neighborhood
+of a receptor before it ever reaches a patient.
+
+Making that screen trustworthy requires an evaluation standard the field lacks. Generative backbone
+models are scored by deviation to a single crystal structure, which cannot separate a design genuinely
+matching a target conformation from one merely close to the groove; sequence models are summarized by one
+average recovery rate, obscuring which constraints produce the signal. I propose that every claim instead
+be evaluated by discrimination between two structurally defined alternatives
+(Figure~\ref{fig:framework}).
+
+\paragraph{Aim 1: Backbone conformation.} Cross-reactive TCRs engage chemically distinct peptides through
+distinct bound conformations, giving a natural two-state system in which off-target recognition is
+structurally explicit. I will ask whether a generative model, given only receptor-side contacts and no
+peptide template, can be steered to a target conformation, including deliberately to the conformation
+\emph{other} than the one nearest its conditioning input. Thresholds will be calibrated against native
+molecular-dynamics ensembles rather than a single snapshot, and independent criteria (proximity, anchor
+identity, burial depth) must agree.
+
+\paragraph{Aim 2: Sequence constraints.} Inverse-folding models recover native TCR interface residues
+well above chance (Ribeiro-Filho et al.\ 2024), but on the receptor side. I will apply them to the
+\emph{peptide} across a panel of solved pMHC--TCR structures, with the TCR present and computationally
+removed, to identify which positions a receptor actually reads. Those positions define the axes along
+which a cross-reactive partner can differ, and therefore where a safety screen must look.
+
+\section{Expected Outcomes}
+
+This fellowship would let me develop that screen into a routine safeguard, turning cross-reactivity from
+a lethal surprise into a predictable and testable step, and making the next generation of cancer
+therapies measurably safer.
+
+\section*{References}
+
+{\scriptsize\setlength{\parskip}{0pt}
+\noindent Mares, S.; Espinoza, A.; and Ioannidis, N. M. 2025a. Continued domain-specific pre-training of
+protein language models for pMHC-I binding prediction. \textit{Proc.\ 20th Machine Learning in
+Computational Biology}, PMLR 311:304--325.\\
+\noindent Mares, S.; Espinoza, A.; and Ioannidis, N. M. 2025b. Generation of structure-guided pMHC-I
+libraries using diffusion models. \textit{ICML Generative AI and Biology Workshop}.\\
+\noindent Ribeiro-Filho, H. V.; et al.\ 2024. Exploring the potential of structure-based deep learning
+approaches for T cell receptor design. \textit{PLOS Comput.\ Biol.}
+\par}
+
+\end{document}
