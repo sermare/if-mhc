@@ -32,27 +32,29 @@
 {\footnotesize Sergio E. Mares, PhD\quad\textperiodcentered\quad Adimab, Mountain View, CA\quad
 \textperiodcentered\quad Center for Computational Biology, UC Berkeley\quad
 \textperiodcentered\quad Department of Neurosurgery, UCSF\par}
-\vspace{8pt}
-{\includegraphics[width=0.53\textwidth]{../figures/fig2_recovery_crossing/fig2_toprow_proposal.png}}
+\vspace{6pt}
 \end{center}
-\vspace{-4pt}
-\refstepcounter{figure}\label{fig:framework}
-{\small\noindent Figure~\thefigure: \textbf{Proposed framework.} A two-state discrimination test for
-structure-based peptide design in a cross-reactive pMHC--TCR system. Diffusion models sample from the
-cognate conformation (teal, left) toward a known off-target conformation (orange, right), two distinct
-peptides the same receptor engages. Each generated backbone (magenta) is scored against both, and
-credited only if substantially closer to the one it is claimed to match.\par}
-\vspace{10pt}
 ]
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../figures/fig2_recovery_crossing/fig2_toprow_proposal.png}
+\caption{\textbf{Proposed framework.} A two-state discrimination test for structure-based peptide design
+in a cross-reactive pMHC--TCR system. Diffusion models sample from the cognate conformation (teal, left)
+toward a known off-target conformation (orange, right), two distinct peptides the same receptor engages.
+Each generated backbone (magenta) is scored against both, and credited only if substantially closer to
+the one it is claimed to match.}
+\label{fig:framework}
+\end{figure}
 
 \noindent\textbf{Motivation.} Engineered T-cell receptor (TCR) therapies have entered clinical practice with the 2024 accelerated
 approval of afamitresgene autoleucel, the first TCR gene therapy and first engineered cell therapy for a
-solid tumor (Singh 2024). Their extension to personalized medicine is constrained by off-target
-cross-reactivity, which remains difficult to anticipate preclinically. The limitation is not theoretical:
-an affinity-enhanced MAGE-A3 receptor that had passed extensive preclinical characterization produced
-fatal cardiogenic shock in the first two treated patients (Linette et al.\ 2013), and the causative
-epitope, a titin-derived self-peptide sharing five of nine residues with the intended target, was
-resolved only retrospectively (Cameron et al.\ 2013).
+solid tumor\textsuperscript{1}. Their extension to personalized medicine is constrained by off-target
+cross-reactivity, which remains difficult to anticipate preclinically. The limitation is not theoretical.
+An affinity-enhanced MAGE-A3 receptor that had passed extensive preclinical characterization produced
+fatal cardiogenic shock in the first two treated patients\textsuperscript{2}, and the causative epitope,
+a titin-derived self-peptide sharing five of nine residues with the intended target, was resolved only
+retrospectively\textsuperscript{3}.
 
 Three factors place this liability beyond current methods. Experimental validation scales poorly against
 a presented peptide space of $\sim$$10^{11}$ sequences, compounded by the narrow clinical window in
@@ -61,16 +63,17 @@ disproportionately so for underrepresented populations, precisely where personal
 needed. Positional scanning mutagenesis characterizes one receptor at a time and does not scale to the
 combinatorics of peptide--TCR interaction.
 
-\noindent\textbf{Proposed framework.} I propose to address this with two complementary tools of my own design: \textbf{ESMCBA}, a
-binding-affinity model using protein language models with domain adaptation that recovers signal for
-data-scarce HLA alleles (Mares, Espinoza, and Ioannidis 2025a), and a \textbf{structure-guided generative
-framework} using diffusion models conditioned on the MHC groove to sample compatible peptides across
-high-priority alleles (Mares, Espinoza, and Ioannidis 2025b). Together they permit computational
+\noindent\textbf{Proposed framework.} I propose to address this with two complementary tools of my own
+design. \textbf{ESMCBA} is a binding-affinity model using protein language models with domain adaptation
+that recovers signal for
+data-scarce HLA alleles\textsuperscript{4}. A \textbf{structure-guided generative framework} uses
+diffusion models conditioned on the MHC groove to sample compatible peptides across high-priority
+alleles\textsuperscript{5}. Together they permit computational
 screening of a receptor's cross-reactive neighborhood before clinical exposure.
 
 Such a screen requires an evaluation standard the field lacks. Generative backbone models are scored by
 deviation to a single crystal structure, which cannot separate a design genuinely matching a target
-conformation from one merely proximal to the groove; sequence models are summarized by one average
+conformation from one merely proximal to the groove. Sequence models are summarized by one average
 recovery rate, obscuring which constraints produce the signal. I propose each claim instead be evaluated
 by discrimination between two structurally defined alternatives (Fig.~\ref{fig:framework}).
 
@@ -78,13 +81,13 @@ by discrimination between two structurally defined alternatives (Fig.~\ref{fig:f
 distinct bound conformations, a two-state system in which off-target recognition is structurally
 explicit. We will assess whether a generative model, given only receptor-side contacts and no peptide
 template, can be steered to a target conformation, including deliberately to the conformation
-\emph{other} than that nearest its conditioning input. Thresholds will be calibrated against native
+other than that nearest its conditioning input. Thresholds will be calibrated against native
 molecular-dynamics ensembles rather than a single snapshot, with independent criteria (proximity, anchor
 identity, burial depth) required to agree.
 
 \paragraph{Aim 2: Sequence constraints.} Inverse-folding models recover native TCR interface residues
-well above chance (Ribeiro-Filho et al.\ 2024), though on the receptor side. We will apply them to the
-\emph{peptide} across solved pMHC--TCR structures, with the TCR present and computationally removed, to
+well above chance\textsuperscript{6}, though on the receptor side. We will apply them to the
+peptide across solved pMHC--TCR structures, with the TCR present and computationally removed, to
 identify which positions a receptor reads. These define the axes along which a cross-reactive partner may
 differ, and therefore where a safety screen must search.
 
@@ -93,18 +96,18 @@ cross-reactivity from an unanticipated failure mode into a predictable, testable
 
 \noindent\textbf{References.}
 {\tiny\setlength{\parskip}{0pt}\setlength{\parindent}{0pt}
-Cameron, B. J.; et al.\ 2013. Identification of a titin-derived HLA-A1-presented peptide as a
-cross-reactive target for engineered MAGE-A3-directed T cells. \textit{Sci.\ Transl.\ Med.}
+1.\ Singh, N. 2024. Approval of the first TCR-based cell therapy. Mol.\ Ther. 32:3195.\\
+2.\ Linette, G. P.; et al.\ 2013. Cardiovascular toxicity and titin cross-reactivity of affinity-enhanced
+T cells in myeloma and melanoma. Blood 122:863--871.\\
+3.\ Cameron, B. J.; et al.\ 2013. Identification of a titin-derived HLA-A1-presented peptide as a
+cross-reactive target for engineered MAGE-A3-directed T cells. Sci.\ Transl.\ Med.
 5:197ra103.\\
-Linette, G. P.; et al.\ 2013. Cardiovascular toxicity and titin cross-reactivity of affinity-enhanced T
-cells in myeloma and melanoma. \textit{Blood} 122:863--871.\\
-Mares, S.; Espinoza, A.; Ioannidis, N. M. 2025a. Continued domain-specific pre-training of protein
-language models for pMHC-I binding prediction. \textit{PMLR} 311:304--325.\\
-Mares, S.; Espinoza, A.; Ioannidis, N. M. 2025b. Generation of structure-guided pMHC-I libraries using
-diffusion models. \textit{ICML GenAI and Biology Workshop}.\\
-Ribeiro-Filho, H. V.; et al.\ 2024. Exploring the potential of structure-based deep learning approaches
-for T cell receptor design. \textit{PLOS Comput.\ Biol.}\\
-Singh, N. 2024. Approval of the first TCR-based cell therapy. \textit{Mol.\ Ther.} 32:3195.
+4.\ Mares, S.; Espinoza, A.; Ioannidis, N. M. 2025. Continued domain-specific pre-training of protein
+language models for pMHC-I binding prediction. PMLR 311:304--325.\\
+5.\ Mares, S.; Espinoza, A.; Ioannidis, N. M. 2025. Generation of structure-guided pMHC-I libraries using
+diffusion models. ICML GenAI and Biology Workshop.\\
+6.\ Ribeiro-Filho, H. V.; et al.\ 2024. Exploring the potential of structure-based deep learning
+approaches for T cell receptor design. PLOS Comput.\ Biol.
 \par}
 
 \end{document}
