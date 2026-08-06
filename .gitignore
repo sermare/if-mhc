@@ -9,9 +9,12 @@
 !UPDATE.md
 
 # analysis notebooks (flat directory; do not sweep in vendored
-# RFdiffusion/ProteinMPNN example notebooks)
+# RFdiffusion/ProteinMPNN example notebooks). notebooks/panel/ holds the
+# twenty-structure panel notebooks that produce every figure in the paper.
 !notebooks/
 !notebooks/*.ipynb
+!notebooks/panel/
+!notebooks/panel/*.ipynb
 
 # scripts (flat directory of .py files; exclude __pycache__)
 !py/
@@ -25,7 +28,9 @@
 # (excludes paper.aux/paper.log build artifacts and the AAAI instructions doc)
 !paper/
 !paper/paper.tex
+!paper/paper_inverse_folding.tex
 !paper/paper.pdf
+!paper/paper_inverse_folding.pdf
 !paper/aaai.sty
 !paper/aaai.bst
 !paper/fixbib.sty
