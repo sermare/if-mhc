@@ -4,9 +4,12 @@
 *
 !.gitignore
 !README.md
-!MAIN_CLAIMS.md
-!ANALYSIS_WALKTHROUGH.md
-!UPDATE.md
+
+# backbone-generation project docs (the earlier manuscript, paper/paper.tex);
+# kept out of the repo root so the cover README speaks only to the inverse-folding paper
+!docs/
+!docs/backbone_generation/
+!docs/backbone_generation/*.md
 
 # analysis notebooks (flat directory; do not sweep in vendored
 # RFdiffusion/ProteinMPNN example notebooks). notebooks/panel/ holds the

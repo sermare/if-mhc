@@ -1,116 +1,101 @@
-# Recovering and Redirecting Peptide Backbone Conformation via Contact-Conditioned Cα Generation in a Cross-Reactive pMHC–TCR System
+# Inverse Folding Models Sample Sequence Space Shaped by MHC Anchor Identity and TCR Context
 
 Sergio E. Mares — Adimab · Center for Computational Biology, UC Berkeley
 
-Paper: [`paper/paper.pdf`](paper/paper.pdf) · Claims: [`MAIN_CLAIMS.md`](MAIN_CLAIMS.md) · Walkthrough: [`ANALYSIS_WALKTHROUGH.md`](ANALYSIS_WALKTHROUGH.md)
+Paper: [`paper/paper_backbone.pdf`](paper/paper_backbone.pdf) · LaTeX source: [`paper/paper_backbone.tex`](paper/paper_backbone.tex) · Overleaf bundle: [`paper/latex.zip`](paper/latex.zip)
 
 ---
 
 ## Abstract
 
-Cross-reactive TCR–pMHC systems, in which one receptor engages chemically distinct peptides through
-distinct bound backbone conformations, raise a question orthogonal to conventional epitope design: can a
-structure-conditioned generative model be steered, from receptor-side information alone, toward a specific
-target backbone conformation — including, deliberately, one other than the conformation nearest its
-conditioning input? Using a minimal two-state system — the DMF5 TCR bound to HLA-A\*02:01, which
-accommodates two different decameric peptides (GIG and DRG) via backbones separated by 2.87 Å Cα
-RMSD — we ask whether RFdiffusion, conditioned only on receptor-side contact residues and given no
-peptide-backbone template, can generate a Cα backbone that recovers a peptide's own native
-conformation or crosses into the alternate one. We score de novo backbones against a three-criterion test
-calibrated to native molecular-dynamics ensembles rather than to a single crystal structure, and address a
-recurring evaluation pitfall by correcting for a backbone-threading artifact that raw RMSD cannot detect.
-We find that both recovery and redirection are achievable but rare, gated by the breadth of conditioning
-rather than by any specific curated residue set, and that once that breadth is met their frequency is
-governed by sampling depth. A templating control further shows that directly supplying backbone geometry
-constrains the target conformation far more tightly than contact conditioning alone, locating register in a
-spatially confined signal that receptor-side contacts only weakly determine. These results, from a single
-system, map the current capability boundary of contact-conditioned backbone generation and separate what
-it can retrieve from what must still be supplied as explicit geometry.
+Inverse-folding models have emerged as potent tools for designing protein sequence from structure, and
+the degree to which they capture the biophysical constraints of a specific molecular interface stands as
+an open question. TCR cross-reactivity has caused fatal toxicity in the clinic, yet the peptide sequence
+space is far too large to screen experimentally. We therefore ask whether inverse-folding models can
+recover the native peptide from structure alone, and what their sampling distribution reveals about the
+constraints that give rise to cross-reactivity. We applied four inverse-folding models to twenty solved
+pMHC–TCR structures under two structural contexts, generating 1.6 million peptide designs, scored where
+allele-matched against two independent binding predictors, and characterized the full sampling
+distribution each model induces over peptide sequence space. No model recovered the native peptide.
+Recovery is instead bimodal across the two anchor positions that dominate MHC binding. The C-terminal
+anchor PΩ, though structurally load-bearing, is largely missed, while the position-2 anchor recovers at
+or above the interior average. Removing the T-cell receptor increases sampling diversity across all four
+models and raises predicted binding affinity in a model-dependent manner, but lowers recovery at
+experimentally validated contact positions and makes every model that reports a confidence score less
+confident in its own designs, showing that the models read the receptor as part of the interface. This
+suggests that inverse-folding models encode peptide compatibility as a set of position-specific
+structural constraints rather than a single optimal sequence. Our investigation establishes the sampling
+distribution as a probe of the constraints governing peptide recognition, and highlights both the promise
+and the limitations of structure-based models for predicting cross-reactivity.
 
-## The two-state system
+## Design
 
-| register | peptide | crystal | anchors |
-|---|---|---|---|
-| **GIG** | `SMLGIGIVPV` | 6AM5 | P2 / PΩ=P10 |
-| **DRG** | `MMWDRGLGMM` | 6AMU | P2 / PΩ=P9 |
-
-The two native backbones differ by **2.87 Å** Cα RMSD — and that difference is almost entirely
-**C-terminal**: P1–P4 are effectively identical between registers (0.30–1.14 Å), while P6 and P10 diverge
-by 5.62 Å and 4.70 Å. *Which peptide position buries in the F-pocket* (p10 = GIG, p9 = DRG) is what
-defines the register.
-
-## Best recovery and best crossing candidate
-
-![Recovery and crossing](figures/fig2_recovery_crossing/fig2_recovery_crossing.png)
-
-**Top — the best de-novo RECOVERY.** A `max`-conditioned 6AMU design (magenta) reproduces its native
-DRG backbone (teal) at **1.07 Å** Cα-RMSD, seats the correct F-pocket occupant (p9) at native burial
-depth (5.81 Å) — clearing all three acceptance criteria — while clearly missing the non-native GIG
-register (orange, 2.75 Å).
-
-**Bottom — the best de-novo CROSSING.** A `L3_nterm_t2`-conditioned 6AM5 design departs from its own
-GIG register (3.02 Å) and hugs the alternate DRG backbone at **1.44 Å**, seating the DRG p9 anchor — inside
-the **1.48 Å** 310 K acceptance band. This is a genuine register crossing driven by receptor-side
-conditioning alone.
-
-## Results — converged campaign (24,831 designs)
-
-Scored against the **physiological 310 K / 50 ns native MD envelope** (moving-block-bootstrap acceptance
-band, DRG ≤1.48 Å, 95% CI 1.36–1.58 Å), with the full three-criterion test (Cα proximity **and** correct
-F-pocket occupant **and** native burial depth):
-
-| group | n | best → own | best → other | **recovery** | **crossing** |
-|---|--:|--:|--:|--:|--:|
-| **de-novo** (receptor contacts only) | 16,919 | **1.07 Å** | **1.44 Å** | **7** | **4** |
-| **null** (no conditioning) | 1,533 | 2.05 Å | 2.21 Å | 0 | 0 |
-| **templated** (native backbone supplied) | 6,041 | 0.10 Å | 1.28 Å | **1,282** | 1 |
-| **crossover** (N-terminus supplied, C-term free) | 338 | 0.54 Å | 1.15 Å | 16 | **20** |
-| **total** | **24,831** | — | — | **1,305** | **25** |
-
-- **Recovery and crossing are real but rare.** 7 de-novo designs recover their native register (best
-  1.07 Å) and 4 cross into the alternate DRG register (best 1.44 Å), every hit forward-threaded and seating
-  the correct p9 anchor. All arise from the broadest conditioning schemes.
-- **The no-conditioning control is clean: 0 / 1,533.** Not one unconditioned draw docks in the groove or
-  comes close in RMSD to either native backbone — so the de-novo events sit above a true zero-information
-  background, not sampling noise.
-- **Redirection needs a register-neutral scaffold.** The purpose-built crossover experiment — templating
-  the register-neutral N-terminus and leaving the divergent C-terminus free — produces **20 crossings in
-  207 designs**, a ~400× enrichment over de-novo, isolating the mechanism of register redirection.
-- **Templating recovers register at will** (1,282/6,041), monotonically with the number of templated
-  residues — locating register in geometry that contacts only weakly determine.
-
-> **Calibration.** All numbers use the physiological **310 K / 50 ns** native ensemble (Amber ff19SB,
-> TIP3P), the study's calibration standard; thresholds carry moving-block-bootstrap 95% CIs (§2.4 of the
-> paper). These README figures reflect the complete converged campaign; the paper reports the same
-> three-criterion analysis on a frozen subset. See `ANALYSIS_WALKTHROUGH.md` and §2.4/§3.1/§3.6.
-
-## Repository
-
-| path | what |
+| | |
 |---|---|
-| `paper/` | LaTeX source + compiled PDF. |
-| `MAIN_CLAIMS.md`, `ANALYSIS_WALKTHROUGH.md` | Claim-by-claim evidence and notebook guide. |
-| `notebooks/` | Analysis notebooks (MD calibration, register scoring, threading, conditioning). |
-| `py/` | Scoring and analysis library — `score_denovo_designs.py` is the three-criterion register scorer; `align_full_pdb.py` produces common-frame structures for rendering. |
-| `jobs/` | Savio/SLURM campaign drivers (spec generator, idempotent workers, watchdog). |
-| `figures/` | Rendered figures and the PyMOL/PIL scripts that build them. |
-| `inputs/focus_6am/` | 6AM5 / 6AMU / 6AMT crystals, contigs, hotspot and ladder specs. |
-| `outputs/` | Not tracked (~50 GB). Curated Cα-backbone archives are published as zips: `paper_designs_by_condition.zip` and `allcond150_designs_by_condition.zip`, plus `condition_manifest.csv`. |
+| **Structures** | 20 solved pMHC–TCR crystals (19 HLA-A\*02:01, 1 HLA-B\*51:01) |
+| **Models** | ProteinMPNN · ProteinMPNN (no MHC) · ESM-IF1 · LigandMPNN |
+| **Contexts** | `full` (MHC + β₂m + TCRαβ) and `mhconly` (TCR removed) |
+| **Sampling** | 10,000 raw designs per (structure, model, context) at *T* = 0.1 |
+| **Total** | **1.6 million peptide designs** |
+| **External scoring** | MHCflurry and ESMCBA, on every unique design from the 19 A\*02:01 structures |
+| **External validation** | SKEMPI 2.0 and IEDB, matched to each structure's own TCR by CDR3 |
 
-## Reproducing the figures
+Only the peptide chain is designed; all other chains are held fixed as structural context.
 
-```bash
-# 1. common-frame align the natives + a design (peptide -> chain P, receptor -> A/B/D/E)
-python py/align_full_pdb.py inputs/focus_6am/6AMU.pdb outputs/aligned/6AMU_native_aligned.pdb
-python py/align_full_pdb.py <design>.pdb              outputs/aligned/<design>_aligned.pdb
+## Key results
 
-# 2. render the PyMOL views
-pymol -cq figures/recovery_denovo_max/render_views.py
-pymol -cq figures/crossing_L3/render_views.py
+**The two MHC anchors behave oppositely, and the difference is chemical rather than positional.**
+P2 (pocket B) constrains a specific side chain and recovers at 0.64 against an interior-position average
+of 0.49. PΩ (pocket F) imposes a permissive backbone constraint that many side chains satisfy, and
+recovers at 0.19 — significantly *below* the interior average (*p* = 0.0054). Both positions are equally
+load-bearing structurally; only one gives a sequence-design model a signal it can act on.
 
-# 3. assemble Fig. 2
-python figures/fig2_recovery_crossing/build_fig2.py
+**Resolution's effect is real but hidden by pooling.** Across twenty different peptides the correlation
+is modest (*r* = −0.49). Holding peptide identity fixed with four independent crystals of SLLMWITQC
+(NY-ESO-1) makes it unambiguous: *r* = −0.99 and −0.97 for recovery, *r* = 0.97 and 0.96 for unique
+design counts.
+
+**Designs look like real binders, unevenly by model.** Two independent predictors agree closely
+(*r* = 0.83–0.91). At the 500 nM cutoff, 61–78% of ProteinMPNN-family and LigandMPNN designs qualify
+versus 45% for ESM-IF1 (χ² = 238.46).
+
+**Removing the TCR pulls three levers in different directions.** Unique design counts roughly double or
+triple (ProteinMPNN 1,081 → 3,671). Predicted affinity rises for some models and not others (no-MHC
+77.5% → 95.2%, LigandMPNN 61.1% → 70.7%, the other two barely move). Recovery at the 21
+experimentally validated TCR-contact positions falls from 54–58% to 34–38%, and every model that emits a
+confidence score becomes less confident in its own output.
+
+## Repository layout
+
+```
+paper/           paper_backbone.tex/.pdf  — the manuscript
+                 latex.zip                — self-contained Overleaf bundle
+                 proposal.tex/.pdf        — one-page fellowship proposal
+notebooks/panel/ 01-07  the canonical analysis; every figure and statistic in the paper
+notebooks/       17-26  earlier single-system and ablation studies
+py/              build_panel_*.py  emit the panel notebooks; one script per notebook
+jobs/            generation drivers (cron-supervised campaign runners)
+figures/         final renders, one directory per figure
+inputs/          pmhc_tcr_dataset/  the 20-structure panel
+docs/            backbone_generation/  docs for the earlier backbone-generation manuscript
 ```
 
-All designs are generated with RFdiffusion (`Complex_base_ckpt`, T=30, de-novo 10-mer, receptor held as
-fixed context) and scored in a common groove frame defined by the 6AMU MHC α1–α2 platform.
+Every figure is produced by a `py/build_panel_*.py` script that emits a notebook under
+`notebooks/panel/`; re-running the script and re-executing the notebook reproduces the numbers exactly.
+
+| notebook | produces |
+|---|---|
+| `01_dataset_presentation` | panel composition, peptide lengths, resolution, MHC contact density |
+| `02_design_presentation` | sampling redundancy, sequence logos, unique-design counts |
+| `03_recovery_presentation` | per-position recovery, the anchor result, TCR-context benefit |
+| `04_replicate_structures` | the same-peptide replicate set that isolates resolution |
+| `05_skempi_validation` | SKEMPI/IEDB cross-reference at validated TCR-contact positions |
+| `06_mhcflurry_esmcba_umap` | predicted-affinity scoring, shared embedding, confidence shift |
+| `07_chemistry` | anchor hydrophobicity and side-chain class |
+
+## A second manuscript lives here
+
+This repository also contains an earlier, separate project — contact-conditioned Cα backbone generation
+in the cross-reactive DMF5 system ([`paper/paper.pdf`](paper/paper.pdf)). Its documentation is under
+[`docs/backbone_generation/`](docs/backbone_generation/). The two share inputs and infrastructure but are
+independent studies; the abstract above describes only the inverse-folding work.

@@ -5,13 +5,13 @@ threads the groove — **GIG** (PDB 6AM5) and **DRG** (PDB 6AMU), 2.87 Å apart 
 project's central question: can RFdiffusion + ProteinMPNN recover a peptide's own native register, or
 even cross it into the other register, from conditioning alone?
 
-This file is the map. All 17 live notebooks are numbered `00`-`16` and grouped by **methodology**, not
+This file is the map. 18 live notebooks are numbered `00`-`17` and grouped by **methodology**, not
 by when they were built. Each group answers a different kind of question; read within a group top to
-bottom, groups can be read independently. Every notebook was regenerated from its builder script
-(`py/build_*.py`) and re-executed end to end on 2026-07-10 — no notebook here contains stale, unexecuted,
-or hand-edited cells. Superseded/redundant notebooks were retired to `archive/notebooks_superseded/`
-(see its `README.md` for exactly why each one was cut). Figures live in `figures/`, not scattered at
-top level.
+bottom, groups can be read independently. Notebooks `00`-`16` were regenerated from their builder scripts
+(`py/build_*.py`) and re-executed end to end on 2026-07-10; `17` was added 2026-07-14, also from a builder
+script, re-executed end to end, 0 errors — no notebook here contains stale, unexecuted, or hand-edited
+cells. Superseded/redundant notebooks were retired to `archive/notebooks_superseded/` (see its
+`README.md` for exactly why each one was cut). Figures live in `figures/`, not scattered at top level.
 
 ---
 
@@ -88,9 +88,11 @@ fixed-backbone positive control.
 
 ## Group E — ProteinMPNN (fixed-backbone sequence design; separate systems)
 
-Two genuinely distinct sub-projects that use ProteinMPNN but aren't about the GIG/DRG register question:
-noMHC-context recovery (still on GIG/DRG, but testing whether the MHC is even needed), and a fully
-separate system (2P5E / NY-ESO-1) used as an earlier design-methodology pilot.
+Three genuinely distinct sub-projects that use ProteinMPNN but aren't about the GIG/DRG register question:
+noMHC-context recovery (still on GIG/DRG, but testing whether the MHC is even needed), a fully separate
+system (2P5E / NY-ESO-1) used as an earlier design-methodology pilot, and a vanilla-vs-noMHC weights
+ablation on the GIG/DRG native backbones specifically (does removing MHC/TCR from training change
+anything, or reveal memorization of these particular pre-2021 PDB entries?).
 
 | # | notebook | question | headline |
 |---|---|---|---|
@@ -98,6 +100,7 @@ separate system (2P5E / NY-ESO-1) used as an earlier design-methodology pilot.
 | 13 | `2p5e_mpnn_design_analysis` | Full ProteinMPNN design-space characterization (logos, entropy, PCA, MHCflurry binding) on the 2P5E/NY-ESO-1 peptide — separate system, methodology pilot. | 50,028 designs; 0 exact native recovery; 22.7% predicted <50nM MHC binders; establishes the design-analysis toolkit later reused on GIG/DRG. |
 | 14 | `2p5e_campaign_comparison` | How does design behavior change across 4 different MPNN campaign contexts (full-complex, MHC-only, no-Met/no-Pro, relaxed-ensemble)? | Identity to native ranges 10.6%-46.6% depending on context; two placeholder sections (RFdiffusion peptides, 22-structure panel) are honest "not ready yet" stubs, not silent gaps. |
 | 15 | `2p5e_relax_ensemble_mpnn` | Does designing across an OpenMM-relaxed backbone *ensemble* (12 conformers) change recovery vs a single static backbone? | 10,671 designs / 3,846 unique across 6 backbones; best single-backbone consensus only 33% identity to native — conformational averaging doesn't rescue recovery either. |
+| 17 | `nomhc_vs_vanilla_native_recovery` | Weights-only ablation: vanilla ProteinMPNN (`v_48_020`) vs `proteinmpnn_nomhc`, same GIG/DRG native crystal backbones, same T=0.1 — does holding MHC/TCR out of training change recovery/AA-composition on the exact backbones it never saw, and is there evidence vanilla memorized these (pre-2021, plausibly-in-trainset) PDB entries? | 0 exact native recovery for either model on either crystal; mean-identity gap **flips sign** between crystals (noMHC actually leads on 6AM5, 49.4% vs 47.8%); the one large anchor gap (P10, 6AM5: 53.7% vanilla vs 0% noMHC) is a single position-specific effect, not a general pattern — net read is no clear memorization signature, consistent with notebook 07's finding that the true backbone (not model weights) is the dominant recovery lever (~16%→~48-49% jump either model). Cross-references notebook 07 (same vanilla weights, de-novo backbones) and notebook 12 (noMHC's own historical near-native baseline, 43.2%/17.1%) live rather than by citation. noMHC data was still mid-campaign at build time — loader auto-picks the largest available snapshot per crystal and is safe to re-run once complete. |
 
 ---
 
@@ -124,6 +127,7 @@ separate system (2P5E / NY-ESO-1) used as an earlier design-methodology pilot.
   (≤0.1% either way) even after removing that artifact and under the widened calibration — not the
   clean "0%, ever" of the original 10ns-MD verdict, but not a capability either.
 - **E (ProteinMPNN, separate systems):** the same tools, different peptide/MHC — useful as a methodology
-  cross-check, not part of the register-crossing verdict.
+  cross-check, not part of the register-crossing verdict. The weights ablation (17) found no clear
+  memorization signature from the vanilla model on the two native backbones it plausibly saw in training.
 - **F (synthesis):** every number in this document has been traced to its source and re-verified; where
   an earlier draft overclaimed, the correction is stated explicitly rather than smoothed over.
