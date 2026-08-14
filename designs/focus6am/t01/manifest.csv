@@ -1,0 +1,3 @@
+complex,pdb,pep_chain,pep_len,pep_seq,pep_resids,pep_fused_to_mhc,mhc_chains,tcr_chains,full_chains,notcr_chains,full_len,notcr_len,dataset_valid,n_chains_in_file,modres_rewritten
+6AM5,6AM5,C,10,SMLGIGIVPV,1;2;3;4;5;6;7;8;9;10,0,AB,DE,CABDE,CAB,816,385,1,5,
+6AMU,6AMU,C,10,MMWDRGLGMM,1;2;3;4;5;6;7;8;9;10,0,AB,DE,CABDE,CAB,815,379,1,5,

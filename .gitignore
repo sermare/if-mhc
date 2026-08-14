@@ -156,3 +156,9 @@ rev_analysis/mdenv/
 rev_analysis/*.pkl
 rev_analysis/*.npz
 rev_analysis/*.log
+
+# curated design outputs: gzipped per-model epitope sequence tables from the
+# inverse-folding sweep (one dir per dataset/temperature). Small enough for git;
+# the ~50GB raw part files under outputs/skempi_if/ stay untracked.
+!designs/
+!designs/**
