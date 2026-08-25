@@ -58,6 +58,11 @@
 # figures (final renders + the scripts that build them)
 !figures/
 !figures/**
+# figures/legacy/ is deliberately NOT tracked: it holds earlier exploratory output
+# including files named for internal Adimab clone IDs. Re-excluded after the !figures/**
+# whitelist above so a `git add -A figures` cannot sweep it into a public commit.
+figures/legacy/
+figures/**/*ADI-*
 
 # inputs: only the 6AM* crystal structures and RFdiffusion spec files used
 # throughout this analysis — not the larger unrelated datasets under inputs/
