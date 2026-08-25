@@ -85,7 +85,8 @@ with different peptides; each ranks its own crystallized peptide 2.3/13 on its o
 paper/           paper_backbone.tex/.pdf  — the manuscript
                  latex.zip                — self-contained Overleaf bundle
 notebooks/panel/ 01-08  the canonical analysis; every figure and statistic in the paper
-py/              build_panel_*.py emit the notebooks; design_corpus.py loads all 3.9M designs
+py/              build_panel_*.py emit the notebooks; design_corpus.py loads all 3.9M designs;
+                 skempi_*.py / score_*.py generated and scored the designs on the cluster
 designs/         the design tables, one gzipped CSV per model and arm
 inputs/          pmhc_tcr_dataset/  the 50 structures, canonicalised to chains A–E
 figures/         paper/     the manuscript's figures, named by the number they carry
