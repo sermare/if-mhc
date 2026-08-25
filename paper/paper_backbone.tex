@@ -57,7 +57,7 @@
 
 \begin{abstract}
 \begin{quote}
-Inverse-folding models have emerged as potent tools for designing protein sequence from structure, and the degree to which they capture the biophysical constraints of a specific molecular interface stands as an open question. TCR cross-reactivity has caused fatal toxicity in the clinic, yet the peptide sequence space is far too large to screen experimentally. We therefore ask whether inverse-folding models can recover the native peptide from structure alone, and what their sampling distribution reveals about the constraints that give rise to cross-reactivity. We applied four inverse-folding models to twenty solved pMHC-TCR structures under two structural contexts, generating 1.6 million peptide designs, scored where allele-matched against two independent binding predictors, and characterized the full sampling distribution each model induces over peptide sequence space. No model recovered the native peptide. Recovery is instead bimodal across the two anchor positions that dominate MHC binding. The C-terminal anchor P$\Omega$, though structurally load-bearing, is largely missed, while the position-2 anchor recovers at or above the interior average. Removing the T-cell receptor increases sampling diversity across all four models and raises predicted binding affinity in a model-dependent manner, but lowers recovery at experimentally validated contact positions and makes every model that reports a confidence score less confident in its own designs, showing that the models read the receptor as part of the interface. This suggests that inverse-folding models encode peptide compatibility as a set of position-specific structural constraints rather than a single optimal sequence. Our investigation establishes the sampling distribution as a probe of the constraints governing peptide recognition, and highlights both the promise and the limitations of structure-based models for predicting cross-reactivity.
+Inverse-folding models have emerged as potent tools for designing protein sequence from structure, and the degree to which they capture the biophysical constraints of a specific molecular interface stands as an open question. TCR cross-reactivity has caused fatal toxicity in the clinic, yet the peptide sequence space is far too large to screen experimentally. We therefore ask whether inverse-folding models can recover the native peptide from structure alone, and what their sampling distribution reveals about the constraints that give rise to cross-reactivity. We applied four inverse-folding models to fifty solved pMHC-TCR structures under two structural contexts, generating 3.9 million peptide designs. Every allele-matched design was scored against two independent binding predictors, and we characterized the full sampling distribution each model induces over peptide sequence space. No model recovered the native peptide. Recovery is instead bimodal across the two anchor positions that dominate MHC binding. The C-terminal anchor P$\Omega$, though structurally load-bearing, is largely missed, while the position-2 anchor recovers at or above the interior average. Removing the T-cell receptor increases sampling diversity and raises predicted binding affinity for all four models, though the size of that affinity gain differs almost sixfold between them. It also lowers recovery at experimentally validated contact positions, and leaves every model that reports a confidence score less confident in its own designs. Both effects indicate that the models read the receptor as part of the interface. This suggests that inverse-folding models encode peptide compatibility as a set of position-specific structural constraints rather than a single optimal sequence. Our investigation establishes the sampling distribution as a probe of the constraints governing peptide recognition, and highlights both the promise and the limitations of structure-based models for predicting cross-reactivity.
 \end{quote}
 \end{abstract}
 \section{Introduction}
@@ -76,7 +76,9 @@ We therefore ask whether inverse-folding models recover the native peptide, and 
 \label{sec:methods}
 
 \subsection{Panel and models}
-Twenty pMHC-TCR crystal structures were retrieved from the Protein Data Bank~\citep{berman2000pdb} (Supplementary Table~\ref{tab:pdblist}). Every structure includes a bound peptide, the MHC class I heavy chain, $\beta_2$-microglobulin, and a complete TCR $\alpha\beta$ heterodimer~\citep{bjorkman1987structure} resolved in the same asymmetric unit with peptides of various lengths (Supplementary Figure \ref{fig:supp1a}). 19 structures are HLA-A*02:01; the remaining structure, 4MJI, is HLA-B*51:01 and was excluded from the allele-specific binding predictor. The average crystallographic resolution is 2.46 $\AA$ (Supplementary Figure \ref{fig:supp1b}).
+Fifty pMHC-TCR crystal structures were retrieved from the Protein Data Bank~\citep{berman2000pdb} (Supplementary Table~\ref{tab:pdblist}). Every structure includes a bound peptide, the MHC chains, and a complete TCR $\alpha\beta$ heterodimer~\citep{bjorkman1987structure} resolved in the same asymmetric unit with peptides of various lengths (Supplementary Figure \ref{fig:supp1a}); the class I entries additionally include $\beta_2$-microglobulin where it was resolved. Forty structures are HLA-A*02:01. The remaining ten are one HLA-B*51:01 (4MJI), one HLA-B*08:01, one HLA-B*35, two mouse H-2L$^d$, and five MHC class II complexes, all of which were excluded from the allele-specific binding predictors. The average crystallographic resolution is 2.51 $\AA$ (Supplementary Figure \ref{fig:supp1b}).
+
+The panel is not fifty independent observations. It contains 33 distinct peptides and 26 distinct CDR3$\beta$ sequences, with SLLMWITQC solved in five crystals and several receptors (A6, 1G4, DMF5) recurring, so a pooled statistic weights an epitope by how often it happens to have been crystallised. We therefore also report a non-redundant set: human MHC class I only, one structure per TCR family (CDR3$\beta$ clustered so clonotypes differing by one or two substitutions collapse together), and one structure per peptide, taking the best-resolution member of each group as its representative so the choice is independent of any score. This leaves 30 structures over 26 peptides when further restricted to HLA-A*02:01 (Supplementary Figure~\ref{fig:supp_dedup}).
 
 The four models are ProteinMPNN~\citep{dauparas2022proteinmpnn}, a message-passing GNN encoding the fixed backbone as a $k$-nearest-neighbor graph and decoding sequence autoregressively; ProteinMPNN (no MHC), the same architecture retrained with MHC/TCR-class structures excluded; ESM-IF1~\citep{hsu2022esmif} and LigandMPNN~\citep{dauparas2025ligandmpnn} (Supplementary Table~\ref{tab:models}).
 
@@ -87,33 +89,32 @@ Each of the four tools samples only the peptide chain, with the MHC, $\beta_2$-m
 \subsection{Models Sample Strong Position-Specific Sequence Bias}
 \label{sec:sampling}
 
-To establish how much of the peptide sequence space these models actually explore, we sampled 10,000 designs per (structure, model) cell in the pMHC+TCR context and counted how many were distinct. Only 50 designs per cell were unique on average, so these models return redundancy rather than diversity (Supplementary
-Figure~\ref{fig:supp2}). Sequence logos~\citep{schneider1990logos} show every
-model imposes strong position-specific restriction independent of recovery (Supplementary Figures~\ref{fig:supp3}--\ref{fig:supp4d}), a property of the sampling distribution rather than evolutionary conservation, tracing the same contacts seen in the crystals, where 23 of 40 MHC positions contacting the peptide anywhere in the panel do so in all twenty (Supplementary Figure~\ref{fig:supp1c}).
+To establish how much of the peptide sequence space these models actually explore, we sampled 9,984 designs per (structure, model) cell in the pMHC+TCR context and counted how many were distinct. An average of only 79 were unique, $0.81\%$ of the draws, ranging from 48 for ESM-IF1 to 105 for ProteinMPNN (no MHC) with 89 for ProteinMPNN and 72 for LigandMPNN, so these models return redundancy rather than diversity (Supplementary Figure~\ref{fig:supp2}). Sequence logos~\citep{schneider1990logos} show every
+model imposes strong position-specific restriction independent of recovery (Supplementary Figures~\ref{fig:supp3}--\ref{fig:supp4d}), a property of the sampling distribution rather than evolutionary conservation, tracing the same contacts seen in the crystals, where 29 of 82 MHC positions contacting the peptide anywhere in the panel do so in at least 40 of the 50 (Supplementary Figure~\ref{fig:supp1c}).
 
 \subsection{The two MHC anchors impose different constraints and recover differently}
 \label{sec:recovery}
 
 To determine which peptide positions carry recoverable signal, we measured per-position recovery of each
-crystal's own native residue, pooled across twenty structures and four models. Recovery is bimodal rather
+crystal's own native residue, pooled across fifty structures and four models. Recovery is bimodal rather
 than uniform, and the two positions where this matters most are the two positions immunology already
 identifies as anchors~\citep{falk1991allele,madden1995three} (Figure~\ref{fig:fig1}). P2, seated in pocket B, constrains a specific side chain
-and recovers well above the interior average ($0.64$ vs.\ $0.49$), whereas P$\Omega$, seated in pocket F,
-imposes a permissive backbone constraint and recovers significantly \emph{below} it ($0.19$ vs.\ $0.49$,
-$p=0.0054$). Both are structurally indispensable, yet only P2 gives a design model a signal it can
-exploit.
+and recovers well above the interior average ($0.65$ vs.\ $0.50$), whereas P$\Omega$, seated in pocket F,
+imposes a permissive backbone constraint and recovers significantly \emph{below} it ($0.26$ vs.\ $0.50$,
+$p=0.00021$). Both are structurally indispensable, yet only P2 gives a design model a signal it can
+exploit. Neither result is an artefact of the panel's redundancy. On the non-redundant HLA-A*02:01 set (30 structures, 26 peptides, one per TCR family) P2 still recovers above interior ($0.64$ vs.\ $0.52$, $p=0.010$) and P$\Omega$ still falls below it ($0.17$, $p<10^{-4}$), and the P$\Omega$ deficit in fact deepens as repeated epitopes are removed, from $0.25$ on the full panel to $0.17$ here (Supplementary Figure~\ref{fig:supp_dedup}).
 
 To ask whether that asymmetry reflects side-chain identity alone or a coarser physicochemical preference,
 we compared each native anchor residue against its own peptide's interior positions on the
 Kyte-Doolittle hydrophobicity scale~\citep{kyte1982simple}, and separately scored every design for whether it preserved the
 native residue's side-chain class (Supplementary Figure~\ref{fig:supp12}). Both anchors are markedly more
-hydrophobic than the interior they sit alongside ($3.44$ at P2 and $3.65$ at P$\Omega$, against an
-interior mean of $0.79$; $p=0.0013$ and $p=0.0001$, paired Wilcoxon across 19 structures), confirming
+hydrophobic than the interior they sit alongside ($3.38$ at P2 and $3.80$ at P$\Omega$, against an
+interior mean of $0.86$; $p<0.0001$ for both, paired Wilcoxon across 40 structures), confirming
 that both pockets recruit hydrophobic residues. The two anchors nonetheless part company on how tightly
 that preference is enforced in the designs. P2 designs preserve the native side-chain class well above
-the interior baseline ($85.6\%$ vs.\ $70.7\%$, $p=0.019$), whereas P$\Omega$ designs do not
-($62.4\%$ vs.\ $70.7\%$, $p=n.s.$), even though P$\Omega$ designs do show significantly reduced
-hydrophobicity variance relative to the interior ($p=0.041$). P$\Omega$ therefore behaves as a pocket
+the interior baseline ($86.1\%$ vs.\ $70.8\%$, $p=0.0002$), whereas P$\Omega$ designs do not
+($67.2\%$ vs.\ $70.8\%$, $p=n.s.$), even though P$\Omega$ designs do show significantly reduced
+hydrophobicity variance relative to the interior ($p=0.0032$). P$\Omega$ therefore behaves as a pocket
 that biases toward a hydrophobic character without fixing which hydrophobic residue satisfies it, which
 is what a low exact-identity recovery at a structurally load-bearing position should look like. 
 % We note
@@ -123,65 +124,70 @@ is what a low exact-identity recovery at a structurally load-bearing position sh
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_violin_summary_full.png}
+\includegraphics[width=\textwidth]{figures/paper/fig1_per_position_recovery_9mer.png}
 \caption{\textbf{Per-position recovery is bimodal, and the two MHC anchors diverge.} Recovery
-of the native residue, pooled across all 20 crystals and 4 models, one violin per peptide position
-(pMHC+TCR context). Individual points are colored by crystal.}
+of the native residue across the 32 nonamer crystals and 4 models, one panel per peptide position
+(pMHC+TCR context). The violin gives the distribution shape and every (crystal, model) value is
+overlaid as a point. Recovery is sharply bimodal at most positions, piling up near 0 and 1 rather
+than spreading around a mean. Positions are only comparable within a peptide length, so each length
+is shown separately; the remaining lengths are in Supplementary
+Figures~\ref{fig:supp_len10} and~\ref{fig:supp_len13}.}
 \label{fig:fig1}
 \end{figure*}
 
 
-Averaged across the entire peptide, the four models fall within a narrow band of mean recovery ($0.41$
-to $0.47$ in full context and $0.28$ to $0.36$ without the TCR; Supplementary Figure~\ref{fig:supp5}),
+Averaged across the entire peptide, the four models fall within a narrow band of mean recovery ($0.43$
+to $0.47$ in full context and $0.29$ to $0.36$ without the TCR; Supplementary Figure~\ref{fig:supp5}),
 narrow enough that the models might appear indistinguishable by inspection. A Friedman test indicates
-otherwise in both contexts ($\chi^2=10.80$, $p=0.013$, full context; $\chi^2=12.18$, $p=0.007$, mhconly),
+otherwise in both contexts ($\chi^2=13.13$, $p=0.004$, full context; $\chi^2=19.38$, $p<0.001$, mhconly),
 so this apparent similarity reflects proximity in magnitude rather than statistical equivalence. As an
 aside, on 3QDG the central Gly-Ile-Gly motif at positions 4--6, well characterized in the literature~\citep{borbulevych2011tcrs},
-recovers essentially perfectly here ($1.00$, $0.73$, $1.00$ vs.\ $0.49$), though we have not attempted a
+recovers essentially perfectly here ($1.00$, $0.73$, $1.00$ vs.\ $0.50$), though we have not attempted a
 systematic motif annotation across the full panel.
 
 The relationship between resolution and recovery illustrates how pooling across a heterogeneous panel
-can understate a genuine effect. Pooled across all twenty distinct peptides, the correlation is modest,
-and only one model survives correction individually ($r=-0.49$ pooled, $p=0.030$; ESM-IF1 alone,
-$r=-0.63$, $p=0.003$; Supplementary Figure~\ref{fig:supp6}). However, four of the twenty structures
-(2P5W, 2BNR, 2F53, and 2F54) are independent crystals of the identical peptide (SLLMWITQC, the NY-ESO-1
-epitope~\citep{chen2005structural,sami2007high} differing primarily in resolution ($1.9$--$2.7$\,\AA). Holding
-peptide identity fixed in this
-way removes a confound that the pooled panel cannot, and the effect becomes unambiguous. Declining
-resolution drives recovery down for two of the four models ($r=-0.99$, $p=0.012$, ProteinMPNN (no MHC);
-$r=-0.97$, $p=0.031$, ESM-IF1) and drives unique design counts up for the remaining two ($r=0.97$,
-$p=0.028$, ProteinMPNN; $r=0.96$, $p=0.040$, ProteinMPNN (no MHC); Supplementary Figure~\ref{fig:supp7}).
-The pooled-panel estimate was therefore not incorrect, but diluted by heterogeneity.
+can understate a genuine effect. Pooled across all fifty structures, the correlation is modest,
+and only one model survives correction individually ($r=-0.29$ pooled, $p=0.040$; ESM-IF1 alone,
+$r=-0.37$, $p=0.008$; Supplementary Figure~\ref{fig:supp6}). However, five of the fifty structures
+(2P5W, 2BNR, 2F53, 2F54 and 2PYE) are independent crystals of the identical peptide (SLLMWITQC, the
+NY-ESO-1 epitope~\citep{chen2005structural,sami2007high}) differing primarily in resolution
+($1.9$--$2.7$\,\AA). Holding peptide identity fixed in this way removes a confound the pooled panel
+cannot. Declining resolution drives recovery down for ProteinMPNN (no MHC) ($r=-0.97$, $p=0.005$)
+and, less clearly, ESM-IF1 ($r=-0.84$, $p=0.075$), and drives unique design counts up for both
+ProteinMPNN variants ($r=0.97$, $p=0.007$ and $r=0.95$, $p=0.012$; Supplementary
+Figure~\ref{fig:supp7}). It is not universal: LigandMPNN moves in the opposite direction on both
+measures ($r=+0.19$ and $r=-0.20$, both n.s.), so the pooled-panel estimate is diluted by
+heterogeneity rather than simply attenuated.
 
 \subsection{Most peptides sampled by inverse-folding models are predicted to be presented}
 \label{sec:affinity}
 
 Having established the recovery rates of the native peptide and the sequence space each structure
 samples, we next asked whether those sampled peptides would actually be presented, scoring every unique
-design from the nineteen HLA-A*02:01 structures for predicted HLA-A2 binding with two unrelated
+design from the forty HLA-A*02:01 structures for predicted HLA-A2 binding with two unrelated
 predictors, MHCflurry~\citep{odonnell2020mhcflurry} and ESMCBA~\citep{esmcba,esmc2024}, neither of which had seen this panel (Figure~\ref{fig:fig2}).
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_esmcba_vs_mhcflurry_by_model.png}
+\includegraphics[width=0.5\textwidth]{figures/paper/fig2_esmcba_vs_mhcflurry.png}
 \caption{\textbf{MHCflurry and ESMCBA predictions of designs} log10(predicted
 IC50, nM) with pMHC+TCR context, one panel per model. Dashed lines mark the 500\,nM; The percentage is the fraction of designs under 500\,nM by both predictors at once.}
 \label{fig:fig2}
 \end{figure}
 
-The two predictors agree closely on the same designs ($r=0.83$--$0.91$ per model in full context, up to
+The two predictors agree closely on the same designs ($r=0.83$--$0.93$ per model in full context, up to
 $0.94$ without the TCR), and agreement between two methodologically unrelated predictors constitutes
 stronger evidence than either predictor alone. On this shared landscape, projected jointly into one UMAP
 embedding space~\citep{mcinnes2018umap} (Supplementary Figure~\ref{fig:supp11}), ProteinMPNN and LigandMPNN consistently sample
-toward higher predicted affinity than ESM-IF1. At the 500\,nM cutoff~\citep{sette1994relationship}, 61--78\% of ProteinMPNN-family and
-LigandMPNN designs qualify by MHCflurry, compared with 45\% for ESM-IF1 ($\chi^2=238.46$,
+toward higher predicted affinity than ESM-IF1. At the 500\,nM cutoff~\citep{sette1994relationship}, 52--64\% of ProteinMPNN-family and
+LigandMPNN designs qualify by MHCflurry, compared with 41\% for ESM-IF1 ($\chi^2=238.50$,
 $p=2\times10^{-51}$; see also Section~\ref{sec:tcr}). This pattern is better characterized as ESM-IF1 being a
 consistent low-affinity outlier than as a general superiority of ProteinMPNN over ESM-IF1, since the
 other three tools do not share this deficit.
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_delta_recovery_heatmap.png}
+\includegraphics[width=\textwidth]{figures/paper/fig3_tcr_context_benefit_heatmap.png}
 \caption{\textbf{Where the TCR-context benefit actually concentrates.} Recovery(full) $-$
 recovery(mhconly), per crystal per model, crystals ordered by resolution (best to worst, left to right).}
 \label{fig:fig3}
@@ -194,10 +200,10 @@ To understand the effect of the TCR on what these models propose, we resampled e
 TCR deleted from the input and compared the resulting designs against the full-complex designs above.
 
 Every model explores substantially more sequence space without the TCR, with unique design counts roughly
-doubling or tripling (ProteinMPNN 1081 $\to$ 3671; ProteinMPNN (no MHC) 958 $\to$ 2362; ESM-IF1 1069 $\to$
-1865; LigandMPNN 668 $\to$ 2111; Supplementary Figure~\ref{fig:supp5}). This larger space skews toward
+doubling or tripling (ProteinMPNN 2047 $\to$ 6637; ProteinMPNN (no MHC) 2363 $\to$ 4478; ESM-IF1 1783 $\to$
+3459; LigandMPNN 1635 $\to$ 4426; Supplementary Figure~\ref{fig:supp5}). This larger space skews toward
 higher predicted affinity, but not uniformly across models. ProteinMPNN (no MHC) shows the largest shift
-(strong-binder rate 77.5\%$\to$95.2\%), LigandMPNN a smaller but genuine one ($61.1\%\to70.7\%$), while
+(strong-binder rate 60.3\%$\to$86.0\%), LigandMPNN a smaller but genuine one ($52.2\%\to62.6\%$), while
 ProteinMPNN and ESM-IF1 show little change (Supplementary Figure~\ref{fig:supp10}). The affinity gain
 associated with TCR removal thus appears concentrated in the two models already most context-sensitive,
 rather than reflecting a general consequence of removing the TCR.
@@ -206,7 +212,7 @@ A related but distinct signal comes from each model's own confidence in the sequ
 independent of either external predictor. ProteinMPNN and ProteinMPNN (no MHC) report an average
 per-residue negative log-likelihood for each design, for which lower values indicate higher confidence;
 LigandMPNN reports an overall confidence score, for which higher values indicate higher confidence.
-Pooled across all nineteen HLA-A*02:01 structures, removing the TCR shifts this internal score for every
+Pooled across all forty HLA-A*02:01 structures, removing the TCR shifts this internal score for every
 model, and in every case toward lower self-assessed confidence (ProteinMPNN mean $1.016\to1.295$;
 ProteinMPNN (no MHC) $0.925\to1.128$; LigandMPNN $0.413\to0.321$; Mann-Whitney $p<10^{-200}$ for all
 three; Supplementary Figure~\ref{fig:supp9a}). This shift is not uniform across the panel. Broken out per
@@ -231,10 +237,52 @@ positions, TCR-present designs recover the native residue $54$--$58\%$ of the ti
 $34$--$38\%$ for TCR-absent designs (Figure~\ref{fig:fig3}), a consistent, though not universal, gap; a
 minority of individual positions move in the opposite direction.
 
+That comparison rests on 21 curated positions. The extended panel supports a more direct version of
+the same test, against measured binding energies rather than curated annotations. Restricting SKEMPI
+to single mutations inside the epitope itself yields 55 (complex, position) pairs across 17 complexes
+with a measured $\Delta\Delta G$. At positions where mutation costs at least 1\,kcal/mol, the recovery
+gain from having the TCR present is $+0.150$, against $+0.018$ elsewhere ($p=0.047$, Mann-Whitney;
+Supplementary Figure~\ref{fig:supp_skempi_pooled}). With the TCR deleted the distinction disappears
+outright ($0.243$ vs.\ $0.172$, $p=0.85$), which is the null this account predicts. We report the
+direction rather than the effect size: critical positions lead in every subset we examined, but the
+pooled $p$ rises to $0.19$--$0.22$ when the three same-epitope H-2A crystals or the class II entries
+are excluded, and survives only 6 of 17 leave-one-complex-out folds. Half the positions come from a
+single epitope, so this is a consistent direction on an underpowered sample rather than an
+established effect.
+
+A second, independent line of evidence separates what these scores do encode from what they do not.
+6AM5 and 6AMU present the same DMF5 receptor and the same HLA-A*02:01 groove with two different
+peptides, so threading one peptide set onto both backbones isolates conformation from sequence.
+Across all three scoring models, each structure's own crystallized peptide ranks $2.3$ of 13 on its
+own backbone and $11.0$ of 13 on the other (Figure~\ref{fig:fig4}). The score
+therefore reads the backbone it is conditioned on, not the peptide sequence alone. Measured affinity
+behaves differently. The same 13 peptides carry published $K_D$ and thermal-stability values, nine of
+them as an actual measurement rather than a bound. Across those nine the score carries no
+information about affinity on either backbone, for any of the three models
+($|\rho|\leq0.32$, all $p>0.4$; Supplementary Figure~\ref{fig:supp_6am_kd}). Including the four
+peptides reported only as $>500\,\mu$M or as not detected raises the apparent correlation to about
+$\pm0.5$ and reverses its sign between the two backbones, but that follows from where the assay
+ceiling falls relative to the two peptide families rather than from the scores, which is why those
+peptides are excluded. The distinction matters for how these models should be used: they report
+which peptides are compatible with a given groove and backbone, the quantity relevant to
+cross-reactivity, and not a ranking of binding strength.
+
+
+% Declared ahead of the Discussion so it can take the top of a column there. Placed after
+% the Discussion it could only go at the bottom, which left the facing column short.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/paper/fig4_dmf5_two_backbones.png}
+\caption{\textbf{Each backbone favours its own crystallized peptide.} The same 13 DMF5
+peptides threaded onto 6AM5 (blue) and 6AMU (orange) and ordered by their score on 6AM5,
+shown as the mean of three models with a $\pm$1 SD band, with rings and dotted lines marking
+each structure's own peptide.}
+\label{fig:fig4}
+\end{figure}
 
 \section{Discussion}
 Inverse-folding models have rapidly advanced structure-based protein design~\citep{dauparas2022proteinmpnn,hsu2022esmif,dauparas2025ligandmpnn}, and their ability to recover native interface residues above chance~\citep{ribeirofilho2024exploring} invites the question of whether they capture the biophysics of an interface or merely reproduce its most constrained positions. High recovery is easily read as the former. Our results point to the latter, since knowing that MHC anchor positions matter explains little on its own. P2 and P$\Omega$ are both structurally indispensable yet behave oppositely under inverse folding, one a side-chain readout, the other a backbone constraint tolerant of many side chains. This finer distinction is what a sequence-design model can meaningfully report.
-The same caution against pooling applies to resolution, where a weak correlation across twenty distinct peptides conceals a model-specific effect once peptide identity is controlled for, using the four SLLMWITQC/NY-ESO-1 crystals as a same-peptide replicate set. TCR removal resists a single verdict for the same reason. Diversity increases for every model, affinity for two, and recovery decreases on average but not everywhere, because whether the model requires the TCR was never one question.
+The same caution against pooling applies to resolution, where a weak correlation across fifty structures conceals a model-specific effect once peptide identity is controlled for, using the five SLLMWITQC/NY-ESO-1 crystals as a same-peptide replicate set. TCR removal resists a single verdict for the same reason. Diversity and predicted affinity both increase for every model, but by margins that differ almost sixfold between them, and recovery decreases on average without decreasing everywhere, because whether the model requires the TCR was never one question.
 
 % \section{Limitations and scope}
 % \label{sec:limitations}
@@ -259,10 +307,12 @@ The same caution against pooling applies to resolution, where a weak correlation
 % \section{Data and code availability}
 % \label{sec:data}
 
-\FloatBarrier
-\bibliography{references}
 
 \FloatBarrier
+
+\bibliography{references}
+
+
 \appendix
 \section{Supplementary Figures}
 
@@ -294,10 +344,43 @@ PDB & Peptide & Length & Allele & Resolution (\AA) \\
 2VLR & GILGFVFTL & 9 & HLA-A*02:01 & 2.30 \\
 4MJI & TAFTIPSI & 8 & HLA-B*51:01 & 2.99 \\
 5NME & SLYNTVATL & 9 & HLA-A*02:01 & 2.94 \\
+\midrule
+1BD2 & LLFGYPVYV & 9 & HLA-A*02:01 & 2.50 \\
+1LP9 & ALWGFFPVL & 9 & HLA-A*02:01 & 2.00 \\
+1MI5 & FLRGRAYGL & 9 & HLA-B*08:01 & 2.50 \\
+1QSE & LLFGYPRYV & 9 & HLA-A*02:01 & 2.80 \\
+2AK4 & LPEPLPQGQLTAY & 13 & HLA-B*35 & 2.50 \\
+2BNQ & SLLMWITQV & 9 & HLA-A*02:01 & 1.70 \\
+2E7L & QLSPFPFDL & 9 & H-2L$^d$ (mouse) & 2.50 \\
+2J8U & ALWGFFPVL & 9 & HLA-A*02:01 & 2.88 \\
+2JCC & ALWGFFPVL & 9 & HLA-A*02:01 & 2.50 \\
+2OI9 & QLSPFPFDL & 9 & H-2L$^d$ (mouse) & 2.35 \\
+2PYE & SLLMWITQC & 9 & HLA-A*02:01 & 2.30 \\
+2UWE & ALWGFFPVL & 9 & HLA-A*02:01 & 2.40 \\
+3C60 & FEAQKAKANKAVD & 13 & H-2A (mouse, class II) & 3.05 \\
+3D3V & LLFGFPVYV & 9 & HLA-A*02:01 & 2.80 \\
+3H9S & MLWGYLQYV & 9 & HLA-A*02:01 & 2.70 \\
+3PWP & LGYGFVNYI & 9 & HLA-A*02:01 & 2.69 \\
+3QDJ & AAGIGILTV & 9 & HLA-A*02:01 & 2.30 \\
+3QIB & ADLIAYLKQATKG & 13 & I-E$^k$ (mouse, class II) & 2.70 \\
+4FTV & LLFGYPVYV & 9 & HLA-A*02:01 & 2.74 \\
+4JFD & ELAAIGILTV & 10 & HLA-A*02:01 & 2.46 \\
+4JFE & ELAGIGALTV & 10 & HLA-A*02:01 & 2.70 \\
+4JFF & ELAGIGILTV & 10 & HLA-A*02:01 & 2.43 \\
+4L3E & ELAGIGILTV & 10 & HLA-A*02:01 & 2.56 \\
+4MNQ & ILAKFLHWL & 9 & HLA-A*02:01 & 2.74 \\
+4OZG & APQPELPYPQPG & 12 & HLA-DQ (class II) & 3.00 \\
+4P23 & FEAQKAKANKAVD & 13 & H-2A (mouse, class II) & 2.25 \\
+4P5T & FEAQKAKANKAVD & 13 & H-2A (mouse, class II) & 3.26 \\
+5E9D & ELAGIGILTV & 10 & HLA-A*02:01 & 2.51 \\
+6AM5 & SMLGIGIVPV & 10 & HLA-A*02:01 & 2.39 \\
+6AMU & MMWDRGLGMM & 10 & HLA-A*02:01 & 2.15 \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{The twenty-structure panel.} PDB accession, native peptide,
-peptide length, MHC allele, and crystallographic resolution for every structure in the panel.}
+\caption{\textbf{The fifty-structure panel.} PDB accession, native peptide,
+peptide length, MHC allele, and crystallographic resolution for every structure in the panel.
+The rule separates the twenty class I HLA-A*02:01-dominated structures above from the thirty
+added subsequently, which extend the panel to HLA-B, mouse H-2 and MHC class II.}
 \label{tab:pdblist}
 \end{table*}
 
@@ -325,8 +408,8 @@ on top of its CATH-derived crystal set~\citep{sillitoe2021cath}).}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S1a}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_peptide_length_dist.png}
-\caption{\textbf{Peptide length distribution} across all 20 structures in the
+\includegraphics[width=0.75\textwidth]{figures/paper/figS1a_peptide_length_distribution.png}
+\caption{\textbf{Peptide length distribution} across all 50 structures in the
 panel.}
 \label{fig:supp1a}
 \end{figure*}
@@ -334,7 +417,7 @@ panel.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S1b}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_resolution_dist.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS1b_resolution_distribution.png}
 \caption{\textbf{Crystallographic resolution per structure.}}
 \label{fig:supp1b}
 \end{figure*}
@@ -342,15 +425,15 @@ panel.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S1c}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_mhc_contact_density.png}
-\caption{\textbf{MHC residue vs.\ peptide contact density,} pooled across all 20 structures.}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS1c_mhc_contact_density.png}
+\caption{\textbf{MHC residue vs.\ peptide contact density,} pooled across all 50 structures.}
 \label{fig:supp1c}
 \end{figure*}
 
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S2}
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_total_vs_unique_full.png}
+\includegraphics[width=0.85\textwidth]{figures/paper/figS2_total_vs_unique_designs.png}
 \caption{\textbf{Extreme redundancy at $T{=}0.1$.} 10,000 raw draws per
 (structure, model); the unique fraction is $0.50\%$ on average and never exceeds a few percent.}
 \label{fig:supp2}
@@ -359,7 +442,7 @@ panel.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S3}
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logos_full.png}
+\includegraphics[width=0.85\textwidth]{figures/paper/figS3_design_logos_pooled.png}
 \caption{\textbf{Design sequence logos, pooled by peptide length, one column per
 model.}}
 \label{fig:supp3}
@@ -368,8 +451,8 @@ model.}}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S4a}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_vanilla.png}
-\caption{\textbf{Per-structure design logos, ProteinMPNN.} All 20 structures,
+\includegraphics[width=0.7\textwidth]{figures/paper/figS4a_design_logos_proteinmpnn.png}
+\caption{\textbf{Per-structure design logos, ProteinMPNN.} All 50 structures,
 ordered by native peptide then resolution.}
 \label{fig:supp4a}
 \end{figure*}
@@ -377,7 +460,7 @@ ordered by native peptide then resolution.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S4b}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_noMHC.png}
+\includegraphics[width=0.7\textwidth]{figures/paper/figS4b_design_logos_nomhc.png}
 \caption{\textbf{Per-structure design logos, ProteinMPNN (no MHC).}}
 \label{fig:supp4b}
 \end{figure*}
@@ -385,7 +468,7 @@ ordered by native peptide then resolution.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S4c}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_ESM-IF1.png}
+\includegraphics[width=0.7\textwidth]{figures/paper/figS4c_design_logos_esmif1.png}
 \caption{\textbf{Per-structure design logos, ESM-IF1.}}
 \label{fig:supp4c}
 \end{figure*}
@@ -393,7 +476,7 @@ ordered by native peptide then resolution.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S4d}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_LigandMPNN.png}
+\includegraphics[width=0.7\textwidth]{figures/paper/figS4d_design_logos_ligandmpnn.png}
 \caption{\textbf{Per-structure design logos, LigandMPNN.}}
 \label{fig:supp4d}
 \end{figure*}
@@ -401,7 +484,7 @@ ordered by native peptide then resolution.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S5}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_unique_per_model_meanstd.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS5_unique_designs_per_model.png}
 \caption{\textbf{Unique designs per model, mean $\pm$ SD across structures,}
 pMHC+TCR vs.\ pMHC only.}
 \label{fig:supp5}
@@ -410,16 +493,18 @@ pMHC+TCR vs.\ pMHC only.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S6}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_recovery_vs_resolution_and_unique.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS6_recovery_and_unique_vs_resolution.png}
 \caption{\textbf{Resolution and unique-design count vs.\ mean recovery, pooled
-across the full 20-structure panel.} $r=-0.49$ ($p=0.030$) and $r=0.45$ ($p=0.049$), $n=20$.}
+across the panel.} $r=-0.32$ ($p=0.031$) and $r=0.41$ ($p=0.005$), $n=45$. Five structures are
+excluded because LigandMPNN produced no designs for them, and summing unique counts over three
+models rather than four would understate their diversity.}
 \label{fig:supp6}
 \end{figure*}
 
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S7}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel4_replicate_structures/fig_panel4_full_panel_recovery_vs_quality.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS7_replicate_groups_vs_quality.png}
 \caption{\textbf{Resolution dependence in a controlled, same-peptide replicate
 set.} Four structures (2P5W, 2BNR, 2F53, 2F54), identical native peptide, near-identical TCR clone; every
 model plotted separately.}
@@ -429,7 +514,7 @@ model plotted separately.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S8a}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_esmcba_vs_mhcflurry_by_model_mhconly.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS8a_esmcba_vs_mhcflurry_no_tcr.png}
 \caption{\textbf{ESMCBA vs.\ MHCflurry agreement, pMHC-only designs,}
 by model.}
 \label{fig:supp8a}
@@ -438,7 +523,7 @@ by model.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S8b}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_recovery_vs_resolution_and_unique_by_model.png}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS8b_resolution_by_model.png}
 \caption{\textbf{Per-model resolution/design-count relationship,} full panel.}
 \label{fig:supp8b}
 \end{figure*}
@@ -446,9 +531,9 @@ by model.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S9a}
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_own_score_shift_pooled.png}
+\includegraphics[width=0.85\textwidth]{figures/paper/figS9a_own_score_shift_pooled.png}
 \caption{\textbf{Each model's own confidence score for its designs shifts when
-the TCR is removed,} pooled across all nineteen HLA-A*02:01 structures. ProteinMPNN and ProteinMPNN (no
+the TCR is removed,} pooled across all forty HLA-A*02:01 structures. ProteinMPNN and ProteinMPNN (no
 MHC): average per-residue negative log-likelihood, lower is more confident. LigandMPNN: overall
 confidence, higher is more confident. All three shift toward lower self-assessed confidence without the
 TCR (Mann-Whitney $p<10^{-200}$ in all three cases).}
@@ -458,7 +543,7 @@ TCR (Mann-Whitney $p<10^{-200}$ in all three cases).}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S9b}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_own_score_shift_by_structure.png}
+\includegraphics[width=0.7\textwidth]{figures/paper/figS9b_own_score_shift_by_structure.png}
 \caption{\textbf{The own-score shift is not uniform across the panel.}
 Bonferroni-corrected significance (full vs.\ mhconly) per structure per model; dark cells are structures
 where the model's own-score distribution did not shift.}
@@ -468,18 +553,22 @@ where the model's own-score distribution did not shift.}
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S10}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_strong_binder_rate_by_model.png}
-\caption{\textbf{Removing the TCR raises predicted affinity, mostly for two of
-the four models.} Strong-binder rate (MHCflurry IC50 $<$ 500\,nM), full vs.\ pMHC-only context, Wilson
-95\% CI. ProteinMPNN (no MHC) and LigandMPNN both shift up substantially without the TCR; ProteinMPNN
-and ESM-IF1 barely move. ESM-IF1 is the lowest-affinity model in both conditions.}
+\includegraphics[width=0.75\textwidth]{figures/paper/figS10_strong_binder_rate_by_model.png}
+\caption{\textbf{Removing the TCR raises predicted affinity for every model, by very different
+amounts.} Strong-binder rate (MHCflurry IC50 $<$ 500\,nM) per model in both structural arms; solid
+bars are pMHC+TCR, hatched bars pMHC only. Brackets give a Fisher's exact test of that model's own
+shift between arms, Bonferroni-corrected across the four models. Every model shifts up significantly,
+but the magnitude separates them: ProteinMPNN (no MHC) gains $25.7$ percentage points and LigandMPNN
+$10.5$, against $5.3$ for ProteinMPNN and $4.0$ for ESM-IF1. ESM-IF1 is the lowest-affinity model in
+both arms. The model ranking is preserved between arms, so the omnibus difference between models
+(reported above each arm) is not an artifact of which context is used.}
 \label{fig:supp10}
 \end{figure*}
 
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S11}
 \centering
-\includegraphics[width=\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_umap_2x3.png}
+\includegraphics[width=\textwidth]{figures/paper/figS11_umap_six_colorings.png}
 \caption{\textbf{The sampled sequence space, colored by predicted binding
 affinity.} One UMAP (ESMCBA embeddings, fit jointly over every unique design), recolored six ways. All
 four models occupy the same overlapping landscape rather than four separate clusters, and MHCflurry and
@@ -490,18 +579,83 @@ ESMCBA, built differently and trained differently, trace the identical gradient 
 \begin{figure*}[p]
 \renewcommand{\thefigure}{S12}
 \centering
-\includegraphics[width=0.62\textwidth]{figures/fig_panel7_chemistry/fig_panel7_native_anchor_hydrophobicity.png}
+\includegraphics[width=0.62\textwidth]{figures/paper/figS12_native_anchor_hydrophobicity.png}
 \caption{\textbf{Both MHC anchors are more hydrophobic than the peptide interior they sit alongside.}
-Kyte-Doolittle hydrophobicity of the native residue at P2 and P$\Omega$ for each of the 19 HLA-A*02:01
+Kyte-Doolittle hydrophobicity of the native residue at P2 and P$\Omega$ for each of the 40 HLA-A*02:01
 structures, plotted against that same peptide's mean over its own interior positions (P3 through the
 second-to-last, excluding P1). Grey lines connect the three values belonging to one peptide; anchor
 points are colored by side-chain class. Both anchors sit well above their own interior
-(paired Wilcoxon, $p=0.0013$ for P2 and $p=0.0001$ for P$\Omega$, $n=19$), so the two pockets do not
+(paired Wilcoxon, $p<0.0001$ for both, $n=40$), so the two pockets do not
 differ in whether they prefer hydrophobic residues. They differ in how strictly the designs honor that
-preference, which is the distinction reported in Section~\ref{sec:recovery}. The four points at
-P$\Omega$ colored as polar are the cysteine-terminated SLLMWITQC/NY-ESO-1 replicates, a residue whose
+preference, which is the distinction reported in Section~\ref{sec:recovery}. The points at
+P$\Omega$ colored as polar are chiefly the cysteine-terminated SLLMWITQC/NY-ESO-1 replicates, a residue whose
 discrete classification understates its hydrophobicity.}
 \label{fig:supp12}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S13}
+\centering
+\includegraphics[width=\textwidth]{figures/paper/figS13_per_position_recovery_10mer.png}
+\caption{\textbf{Per-position recovery, decamers.} As Figure~\ref{fig:fig1}, for the 11 crystals with a
+10-residue epitope. The P2 anchor again recovers above the interior, and the C-terminal anchor P$\Omega$
+falls to $0.08$, lower than in the nonamers.}
+\label{fig:supp_len10}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S14}
+\centering
+\includegraphics[width=\textwidth]{figures/paper/figS14_per_position_recovery_13mer.png}
+\caption{\textbf{Per-position recovery, 13-mers.} As Figure~\ref{fig:fig1}, for the 5 crystals with a
+13-residue epitope. Four of the five are MHC class II complexes, which have no P2 or P$\Omega$ anchor
+pocket, and the anchor structure seen at class I is correspondingly absent.}
+\label{fig:supp_len13}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S15}
+\centering
+\includegraphics[width=\textwidth]{figures/paper/figS15_skempi_ddg_vs_recovery.png}
+\caption{\textbf{Measured binding effect vs.\ recovery, pooled over every SKEMPI complex with designs.}
+Each point is one (complex, peptide position) with a measured single-mutation
+$\Delta\Delta G$; positive $\Delta\Delta G$ means the mutation weakens binding, marking a position the
+interface depends on. Left, recovery with the TCR present. Middle, the recovery gain from TCR context.
+Right, that gain against $\Delta\Delta G$ directly. 55 positions across 17 complexes, against the five
+positions in one crystal available before the panel was extended. $\Delta\Delta G$ marks positions the
+interface depends on, which includes MHC anchors as well as TCR contacts.}
+\label{fig:supp_skempi_pooled}
+\end{figure*}
+
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S16}
+\centering
+\includegraphics[width=\textwidth]{figures/paper/figS16_dmf5_score_vs_kd.png}
+\caption{\textbf{The score carries no information about measured affinity.} LigandMPNN score against
+published $K_D$ for the nine DMF5 peptides with an actual measured value, scored on 6AM5 (left) and
+6AMU (right); points are colored by melting temperature and each structure's own crystallized peptide
+is circled. Four further peptides are excluded because their $K_D$ is reported only as $>500\,\mu$M or
+as not detected, which is an assay ceiling rather than a measurement. Neither backbone shows a
+relationship. Contrast this with Figure~\ref{fig:fig4}, where the same scores
+separate the two peptide families cleanly: these models place a peptide, they do not rank it.}
+\label{fig:supp_6am_kd}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S17}
+\centering
+\includegraphics[width=\textwidth]{figures/paper/figS17_anchor_non_redundant_sets.png}
+\caption{\textbf{The anchor split is not an artefact of the panel's redundancy.} The panel holds 50
+structures but only 33 distinct peptides and 26 distinct CDR3$\beta$ sequences, so a pooled statistic
+weights an epitope by how often it was crystallised. Left, P2, interior and P$\Omega$ recovery on
+progressively stricter sets: human MHC class I only, then one structure per TCR family (CDR3$\beta$
+clustered so clonotypes differing by one or two substitutions collapse), then one per peptide, then
+restricted to HLA-A*02:01; each group is represented by its best-resolution member, chosen
+independently of any score. Right, the same result as the two gaps that define it. Both survive, and
+the P$\Omega$ deficit deepens from $0.23$ to $0.35$ as repeated epitopes are removed. The one
+exception is P2 on the TCR-only set, which at 17 structures is underpowered rather than contradictory.}
+\label{fig:supp_dedup}
 \end{figure*}
 
 \end{document}

@@ -8,19 +8,32 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{xcolor}
-\definecolor{drgteal}{RGB}{0,191,191}
-\definecolor{gigorange}{RGB}{255,128,0}
-\definecolor{mhcgrey}{RGB}{160,160,160}
-\newcommand{\sq}[1]{\textcolor{#1}{\rule{1.4ex}{1.4ex}}}
+\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{amsmath}
+\usepackage{url}
 
+% Numbered citations (overrides the AAAI "named" citation macros loaded above).
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{plainnat}
+
+% Clickable cross-references: citations, figures, tables and sections.
+\usepackage[dvipsnames]{xcolor}
+\definecolor{linknavy}{RGB}{20,70,140}
+\usepackage[colorlinks=true,
+            linkcolor=linknavy,
+            citecolor=linknavy,
+            urlcolor=linknavy,
+            breaklinks=true]{hyperref}
+
+\raggedbottom
 \frenchspacing
 \setlength{\pdfpagewidth}{8.5in}
 \setlength{\pdfpageheight}{11in}
 \pdfinfo{
-/Title (Recovering and Redirecting Peptide Backbone Conformation via Contact-Conditioned C-alpha Generation in a Cross-Reactive pMHC-TCR System)
+/Title (Inverse Folding Models Sample Sequence Space Shaped by MHC Anchor Identity and TCR Context)
 /Author (Sergio Mares)
-/Keywords (RFdiffusion, pMHC, TCR, protein design, structure generation, null baseline)
+/Keywords (inverse folding, ProteinMPNN, ESM-IF1, LigandMPNN, pMHC, TCR, protein design, IEDB, SKEMPI, MHCflurry, ESM-Cambrian)
 }
 \setcounter{secnumdepth}{2}
 \renewcommand{\topfraction}{0.9}
@@ -35,7 +48,7 @@
 \setcounter{dbltopnumber}{4}
 \begin{document}
 
-\title{Recovering and Redirecting Peptide Backbone Conformation via Contact-Conditioned C$\alpha$ Generation in a Cross-Reactive pMHC--TCR System}
+\title{Inverse Folding Models Sample Sequence Space Shaped by MHC Anchor Identity and TCR Context}
 \author{Sergio E. Mares$^{1,2}$ \\
 {\small $^1$Adimab, Mountain View, CA 94043, USA} \\
 {\small $^2$Center for Computational Biology, University of California, Berkeley, CA 94720, USA}}
@@ -44,624 +57,451 @@
 
 \begin{abstract}
 \begin{quote}
-Cross-reactive TCR--pMHC systems, in which one receptor engages chemically distinct peptides through
-distinct bound backbone conformations, raise a question orthogonal to conventional epitope design: can a
-structure-conditioned generative model be steered, from receptor-side information alone, toward a specific
-target backbone conformation --- including, deliberately, one other than the conformation nearest its
-conditioning input? Using a minimal two-state system --- the DMF5 TCR bound to HLA-A*02:01, which
-accommodates two different decameric peptides (GIG and DRG) via backbones separated by 2.87\AA{} C$\alpha$
-RMSD --- we ask whether RFdiffusion, conditioned only on receptor-side contact residues and given no
-peptide-backbone template, can generate a C$\alpha$ backbone that recovers a peptide's own native
-conformation or crosses into the alternate one. We score de novo backbones against a three-criterion test
-calibrated to native molecular-dynamics ensembles rather than to a single crystal structure, and address a
-recurring evaluation pitfall by correcting for a backbone-threading artifact that raw RMSD cannot detect.
-We find that both recovery and redirection are achievable but rare, gated by the breadth of conditioning
-rather than by any specific curated residue set, and that once that breadth is met their frequency is
-governed by sampling depth. A templating control further shows that directly supplying backbone geometry
-constrains the target conformation far more tightly than contact conditioning alone, locating register in a
-spatially confined signal that receptor-side contacts only weakly determine. These results, from a single
-system, map the current capability boundary of contact-conditioned backbone generation and separate what
-it can retrieve from what must still be supplied as explicit geometry.
+Inverse-folding models have emerged as potent tools for designing protein sequence from structure, and the degree to which they capture the biophysical constraints of a specific molecular interface stands as an open question. TCR cross-reactivity has caused fatal toxicity in the clinic, yet the peptide sequence space is far too large to screen experimentally. We therefore ask whether inverse-folding models can recover the native peptide from structure alone, and what their sampling distribution reveals about the constraints that give rise to cross-reactivity. We applied four inverse-folding models to twenty solved pMHC-TCR structures under two structural contexts, generating 1.6 million peptide designs, scored where allele-matched against two independent binding predictors, and characterized the full sampling distribution each model induces over peptide sequence space. No model recovered the native peptide. Recovery is instead bimodal across the two anchor positions that dominate MHC binding. The C-terminal anchor P$\Omega$, though structurally load-bearing, is largely missed, while the position-2 anchor recovers at or above the interior average. Removing the T-cell receptor increases sampling diversity across all four models and raises predicted binding affinity in a model-dependent manner, but lowers recovery at experimentally validated contact positions and makes every model that reports a confidence score less confident in its own designs, showing that the models read the receptor as part of the interface. This suggests that inverse-folding models encode peptide compatibility as a set of position-specific structural constraints rather than a single optimal sequence. Our investigation establishes the sampling distribution as a probe of the constraints governing peptide recognition, and highlights both the promise and the limitations of structure-based models for predicting cross-reactivity.
 \end{quote}
 \end{abstract}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{../figures/fig1_pipeline/fig1_pipeline.png}
-\caption{\textbf{Pipeline schematic.} RFdiffusion (contact-hotspot conditioning, contig \texttt{10-10}, no
-peptide template) $\rightarrow$ generated C$\alpha$ backbone $\rightarrow$ three-criterion register scoring
-against MD-calibrated thresholds $\rightarrow$ (downstream, out of scope here) ProteinMPNN sequence
-design.}
-\label{fig:pipeline}
-\end{figure}
-
 \section{Introduction}
+T-cell receptor (TCR) engineering therapies promise a transformative future for cancer treatment, and the first reached approval in 2024~\citep{fda2024tecelra,hong2023mage}, yet cross-reactivity, the recognition of unintended peptide-MHC (pMHC) complexes, remains a fundamental barrier to scaling them into personalized medicine~\citep{mason1998crossreactivity,wooldridge2012million}. An affinity-enhanced MAGE-A3 receptor that had cleared extensive preclinical testing ultimately caused fatal cardiac toxicity in two patients, cross-recognizing an unrelated pMHC derived from titin~\citep{linette2013cardiovascular,cameron2013titin}.
 
-Cross-reactive TCR--pMHC pairs that engage chemically distinct peptides via distinct bound backbone
-conformations pose a design question orthogonal to conventional epitope design: can a structure-generative
-model be conditioned, using only information available on the receptor side, to produce a specific target
-backbone conformation --- including, deliberately, the conformation other than the one nearest to the
-conditioning input? We address this question exclusively at the C$\alpha$ backbone level. RFdiffusion
-generates backbone coordinates without an associated sequence at this stage of the pipeline; consequently
-every metric defined here operates on C$\alpha$ geometry, treated throughout as a geometric rather than
-sequence property. GIG and DRG are not the same peptide sequence adopting two registers of a shared groove
-placement --- they are two different decamers (SMLGIGIVPV and MMWDRGLGMM) that DMF5 happens to recognize
-via two different bound backbone shapes. We use ``register'' only as shorthand for ``which of the two
-backbone conformations,'' never to imply a shared sequence.
+Experimental methods therefore sample only a fraction of the pMHC-TCR interaction space, which is combinatorially vast, roughly 
+20$^L$  for a peptide of length L, yet far from uniform.
+The anchor sites collapse the entropy at fixed positions while leaving the remainder variable~\citep{falk1991allele,rammensee1999syfpeithi}, so the effective dimensionality of the presented distribution falls far below its combinatorial ceiling. It is this low-dimensional structure that makes the problem learnable, yet the same data limitations that bound experimental sampling also limit the models trained on that data~\citep{odonnell2020mhcflurry,reynisson2020netmhcpan}, motivating approaches that exploit structural rather than purely sequence-based signals.
 
-A central methodological problem in evaluating this kind of claim is that ``resembles the native peptide''
-has historically been operationalized as C$\alpha$ RMSD to a single crystal structure, an unscaled
-quantity: a design at 1.2\AA{} cannot be judged ``inside'' or ``outside'' a conformational envelope without
-knowing how wide that envelope is. We address this by calibrating acceptance thresholds against a native
-310K/50ns MD ensemble of both conformations (Methods \S2.4), and by requiring three independent criteria to
-agree (proximity, anchor identity, burial depth) rather than relying on proximity alone, which is
-separately confounded by a backbone-threading artifact (\S3.4) that a raw-RMSD-only criterion cannot
-detect.
+Inverse-folding models sample sequences from a distribution conditioned on structure~\citep{dauparas2022proteinmpnn,hsu2022esmif}, and on the receptor side of this interface, the approach has recent precedent. Comparing ProteinMPNN and ESM-IF1 against physics-based Rosetta design~\citep{alford2017rosetta} across 38 solved TCR-pMHC complexes, prior work~\citep{ribeirofilho2024exploring} found that both inverse-folding models recover native CDR3 interface residues well above chance, establishing that inverse folding captures real, non-trivial signals from a TCR-pMHC interface.
 
-We report five results, ordered to lead with the central empirical finding (recovery and crossing both
-occur and are quantifiable) before addressing what gates their occurrence, what does not explain their
-rate, a methodological artifact that must be corrected for, and the underlying mechanism.
+Here, we turn the same class of models toward the peptide itself. The point estimate asks whether the model recovers the native peptide the structure was solved with; the distribution asks which other peptides the model treats as compatible with the same groove and the same receptor, precisely the variant and off-target sequences that underlie cross-reactivity. Because inverse-folding models score structural compatibility rather than a labeled binding phenotype, that distribution provides a first-pass map of the tolerated peptide neighborhood around the native ligand, and, because MHC-groove geometry and TCR-contact geometry occupy structurally distinguishable positions along the peptide, acts as a probe of which positions the model treats as side-chain-constrained versus permissive.
+We therefore ask whether inverse-folding models recover the native peptide, and whether the distribution they induce over sequence space concentrates on the tolerated neighborhood underlying cross-reactivity and off-target recognition.
 
-\section{Methods}
+\section{Materials and Methods}
+\label{sec:methods}
 
-\subsection{Structural system and conformational-state definition}
+\subsection{Panel and models}
+Twenty pMHC-TCR crystal structures were retrieved from the Protein Data Bank~\citep{berman2000pdb} (Supplementary Table~\ref{tab:pdblist}). Every structure includes a bound peptide, the MHC class I heavy chain, $\beta_2$-microglobulin, and a complete TCR $\alpha\beta$ heterodimer~\citep{bjorkman1987structure} resolved in the same asymmetric unit with peptides of various lengths (Supplementary Figure \ref{fig:supp1a}). 19 structures are HLA-A*02:01; the remaining structure, 4MJI, is HLA-B*51:01 and was excluded from the allele-specific binding predictor. The average crystallographic resolution is 2.46 $\AA$ (Supplementary Figure \ref{fig:supp1b}).
 
-The system is HLA-A*02:01 ($\alpha$1/$\alpha$2/$\alpha$3, chain A) with $\beta$2-microglobulin (chain B), a
-10-residue peptide (chain C), and the DMF5 TCR $\alpha$/$\beta$ V-domains (chains D/E), crystallized in two
-forms: 6AM5, bearing the peptide SMLGIGIVPV (``GIG''), and 6AMU, bearing the peptide MMWDRGLGMM (``DRG'')
---- two different decamer sequences, not one sequence in two groove registers. Component-wise C$\alpha$
-RMSD between the two crystals (computed after superposing the rigid MHC $\alpha$1/$\alpha$2 platform)
-localizes essentially the entire 2.87\AA{} difference between the two complexes to the peptide backbone;
-the MHC groove floor (0.20--0.39\AA{}), CDR3$\alpha$ (0.59\AA{}), and CDR3$\beta$ (0.47\AA{}) are rigid
-between the two forms. ``Register'' is used only as a name for a peptide's bound C$\alpha$ conformation in
-a common reference frame (\S2.3); it carries no sequence-identity meaning here.
+The four models are ProteinMPNN~\citep{dauparas2022proteinmpnn}, a message-passing GNN encoding the fixed backbone as a $k$-nearest-neighbor graph and decoding sequence autoregressively; ProteinMPNN (no MHC), the same architecture retrained with MHC/TCR-class structures excluded; ESM-IF1~\citep{hsu2022esmif} and LigandMPNN~\citep{dauparas2025ligandmpnn} (Supplementary Table~\ref{tab:models}).
 
-\subsection{Backbone generation}
-
-De novo peptide backbones were generated with RFdiffusion (\texttt{Complex\_base\_ckpt.pt}, SE3nv
-environment), contig specification \texttt{A1-180/0 B1-100/0 D1-115/0 E1-120/0 10-10} (MHC/B2M/TCR$\alpha$/
-TCR$\beta$ held fixed as structural context; the terminal \texttt{10-10} block is fully de novo with no
-peptide-backbone residues templated), \texttt{diffuser.T=30} (full reverse-diffusion trajectory)
-throughout. Conditioning was varied solely via \texttt{ppi.hotspot\_res}, ranging from 3 to 42
-receptor-side residues across 55 (crystal $\times$ conditioning) cells drawn from 5 campaigns (internal
-names: \texttt{grind}, \texttt{ladder}, \texttt{promising}, \texttt{denovo30}, \texttt{maxcond}), totaling
-1,295 scoreable 10-residue designs after filtering (\S2.3). We name each conditioning cell by its hotspot
-count (e.g. \texttt{C18} $=$ 18 receptor-side hotspot residues) rather than by internal campaign codename,
-since contact count is the property under discussion throughout \S3; where the same count was tested on
-both crystals we disambiguate with a crystal suffix, e.g. \texttt{C24 (6AM5)} vs.\ \texttt{C24 (6AMU)}.
-This is the corpus used for the register test in \S3.1--3.4; it is distinct from (i) the motif-templating
-ladder (\S3.5), a separate small set of cells (\texttt{fixall}$\rightarrow$\texttt{fix0},
-\texttt{rfd\_recover} campaign, $N=10$ designs/crystal/level) that still carry the full rich hotspot list
-but vary how much of the native peptide backbone is additionally supplied as a template, and (ii) the
-null-baseline campaign (\S3.6), a new set of cells (\texttt{null0}) carrying \textit{no} hotspots and no
-template at all. Of the 55 conditioning cells, 16 pool draws from more than one campaign launched at
-different times under the same (crystal, conditioning) specification --- e.g., the \texttt{C3}--\texttt{C12}
-contact-count ladder draws from \texttt{denovo30}, \texttt{ladder}, and \texttt{promising} jointly, and
-\texttt{mhc}/\texttt{mhc\_tcr2}/\texttt{tcr2} draw from \texttt{denovo30} and \texttt{grind} jointly. We
-disclose this because it means the 55 cells are not 55 single-shot, mutually independent draws; they are
-55 conditioning \textit{specifications}, several of which were incrementally added to across sequential
-campaign launches. This is consistent with --- and does not undermine --- the \S3.3 finding that per-cell
-hit count tracks cumulative draw count, since draws accumulated for the same cell over time are exactly
-the repeated-sampling process that finding describes.
-
-\subsection{Register scoring}
-
-For each design, the MHC $\alpha$1/$\alpha$2 C$\alpha$ trace is superposed onto a common reference frame
-via robust (outlier-trimmed) Kabsch alignment; the peptide C$\alpha$ coordinates are transformed into that
-same frame, making them directly comparable to the two native reference conformations (GIG, DRG; each a
-fixed (10,3) C$\alpha$ array in the same frame) and to a native MD trajectory processed identically.
-
-A design is scored on three criteria, each thresholded against a native MD ensemble of the \textit{target}
-conformation (own conformation for ``recovery,'' alternate conformation for ``crossing''):
-
-\begin{enumerate}
-\item \textbf{Proximity} --- mean C$\alpha$ RMSD to the target's 10-residue reference $\leq$ (native MD
-  mean $+$ 3$\sigma$) for that conformation.
-\item \textbf{Anchor identity} --- the design's C$\alpha$ position with minimum distance to a fixed
-  F-pocket centroid (defined from six HLA-A*02 F-pocket residues) must equal the target's native anchor
-  position (P10 for GIG, P9 for DRG).
-\item \textbf{Burial depth} --- that minimum F-pocket distance must fall within (native MD mean
-  $\pm$3$\sigma$) for the target conformation.
-\end{enumerate}
-
-All three must hold simultaneously. This retires two previously used but unreliable proxies: raw
-RMSD-only thresholding (which never registers a crossing under any threshold in the 1.4--2.5\AA{} range
-tested historically, a false-negative failure mode) and F-pocket-argmin proximity alone without a depth
-requirement --- 388/1,295 designs (30\%) satisfy this alone, which we consider false-positive-prone, since
-it is spoofable by centroid-adjacent scatter unrelated to genuine anchor burial.
-
-\textbf{Threading classification.} Each design's F-pocket-proximal anchor position was additionally
-classified as \textit{forward} (positions P7--P10 occupy the F-pocket, matching both native
-conformations' actual anchor placement) or \textit{reverse} (P1--P4), with P5--P6 as an ambiguous buffer
-zone; this classification was derived from the empirical bimodal distribution of anchor position across
-the full corpus (\S3.4) and is applied as a filter before all recovery/crossing statistics reported in
-\S3.1--3.3 (forward-threaded subset, $N=600$).
-
-\subsection{Native MD calibration}
-
-Explicit-solvent MD (Amber ff19SB force field, TIP3P water, 12\AA{} periodic box, 0.15M NaCl, 2fs
-timestep, minimization to convergence, $\leq$10,000 steps) was run for each crystal structure at 310K
-(body temperature; 2ns equilibration, 50ns production). Each native conformation is thereby represented by
-its 1,000-frame thermal ensemble rather than a single crystal structure, and acceptance thresholds are
-calibrated to that ensemble.
-
-Because the thresholds are estimated from a finite, temporally autocorrelated trajectory, we do not treat
-them as exact: we quantify their sampling uncertainty with a moving-block bootstrap (block length twice the
-integrated autocorrelation time, 4{,}000 resamples), reporting each threshold as a point estimate with a
-95\% confidence interval. Convergence is uneven between the two runs --- the DRG (6AMU) trajectory is well
-sampled (integrated autocorrelation time 1.9ns; effective sample size $\approx$13 of 1{,}000 frames)
-whereas the GIG (6AM5) run is not ($\approx$2) --- so we treat the DRG band as the primary calibration and
-present register \emph{redirection} exclusively as recovery of the DRG conformation from a 6AM5 scaffold,
-adjudicated against the well-converged DRG band. The resulting bands are:
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lcc}
-\toprule
-conformation & proximity (95\% CI) & F-pocket depth \\
-\midrule
-DRG (6AMU), primary & $\leq$1.48\AA{} [1.36--1.58] & [3.95, 6.02]\AA{} \\
-GIG (6AM5), under-sampled & $\leq$1.65\AA{} [1.30--1.68] & [3.48, 4.79]\AA{} \\
-\bottomrule
-\end{tabular}
-\caption{Calibrated acceptance bands (310K/50ns MD) with block-bootstrap 95\% CIs. A design whose
-C$\alpha$ RMSD falls within a band's CI is reported as consistent with the native envelope within
-calibration uncertainty. The GIG band is under-sampled (ESS $\approx$2) and is not used to adjudicate
-redirection.}
-\label{tab:bands}
-\end{table}
-
-The two native conformations remain cleanly separated basins --- each native ensemble sits $\sim$0.9\AA{}
-from its own reference, far inside the 2.87\AA{} crystal-to-crystal separation --- so the criteria
-discriminate register rather than merely detecting a groove-resident backbone. As a negative control,
-unconditioned draws (no hotspots, no template) never enter either acceptance envelope.
-
-\subsection{Null/background campaign}
-
-To measure the chance rate at which RFdiffusion produces a backbone landing inside either acceptance
-envelope with \textbf{no} conditioning information at all, we generated a separate set of designs
-(\texttt{null0} cells, one per crystal) using the same contig (\texttt{10-10}, no template) but omitting
-\texttt{ppi.hotspot\_res} entirely --- the receptor chains are still held fixed as structural context, but
-no contact information is supplied. This is distinct from the \texttt{fix0} cells used in the templating
-ladder (\S3.5), which --- despite the name --- still carry the full rich hotspot list; \texttt{fix0}
-varies template fraction at fixed (maximal) hotspot conditioning, whereas \texttt{null0} removes hotspot
-conditioning entirely. Status and current $N$ are reported in \S3.6.
-
-\subsection{Statistical analysis}
-
-Proportions are reported with Clopper--Pearson exact 95\% confidence intervals. Comparisons between
-conditioning tiers use Fisher's exact test; where one cell of the $2\times2$ table is zero, we additionally
-report a Haldane--Anscombe continuity-corrected odds ratio ($+0.5$ to all cells) with its associated 95\%
-CI. Where multiple (55) conditioning cells were compared to identify an outlier cell, the resulting
-$p$-value is Bonferroni-corrected for 55 comparisons. The relationship between per-cell sample size and
-per-cell hit count was assessed by Pearson correlation across all 55 cells.
+Each of the four tools samples only the peptide chain, with the MHC, $\beta_2$-microglobulin, and (where present) TCR chains held fixed as structural context. Two context conditions were run for every structure, MHC + $\beta_2$m + TCR$\alpha\beta$ and the TCR removed from the input structure entirely. Each condition was sampled to 10,000 raw designs at a fixed sampling temperature of $T=0.1$.
 
 \section{Results}
 
-We generated 8{,}722 de novo peptide backbones across 20 conditioning schemes (both crystals), together
-with 932 unconditioned (null) draws and 3{,}060 templating controls, and scored each against the
-three-criterion register test described in \S2.3, adjudicated against the well-converged 310K DRG
-acceptance band (\S2.4). Several designs entered the native envelope: some recovered their own native
-conformation, and others matched the \textit{alternate} conformation better than their own. Reaching a
-clean count of these events, however, first required resolving a structural ambiguity present in every
-conditioning scheme tested --- described in \S3.4 --- which we identified during this analysis and
-corrected for before computing any of the statistics below. We present the headline result first
-(\S3.1), then work outward to what explains its pattern (\S3.2--3.3), the correction that made it
-trustworthy (\S3.4), and the mechanism underneath (\S3.5), closing with the design and status of a direct
-null-baseline measurement (\S3.6).
+\subsection{Models Sample Strong Position-Specific Sequence Bias}
+\label{sec:sampling}
 
-\subsection{Both recovery and crossing occur at low, bounded rates}
+To establish how much of the peptide sequence space these models actually explore, we sampled 10,000 designs per (structure, model) cell in the pMHC+TCR context and counted how many were distinct. Only 50 designs per cell were unique on average, so these models return redundancy rather than diversity (Supplementary
+Figure~\ref{fig:supp2}). Sequence logos~\citep{schneider1990logos} show every
+model imposes strong position-specific restriction independent of recovery (Supplementary Figures~\ref{fig:supp3}--\ref{fig:supp4d}), a property of the sampling distribution rather than evolutionary conservation, tracing the same contacts seen in the crystals, where 23 of 40 MHC positions contacting the peptide anywhere in the panel do so in all twenty (Supplementary Figure~\ref{fig:supp1c}).
 
-\begin{figure*}[t]
+\subsection{The two MHC anchors impose different constraints and recover differently}
+\label{sec:recovery}
+
+To determine which peptide positions carry recoverable signal, we measured per-position recovery of each
+crystal's own native residue, pooled across twenty structures and four models. Recovery is bimodal rather
+than uniform, and the two positions where this matters most are the two positions immunology already
+identifies as anchors~\citep{falk1991allele,madden1995three} (Figure~\ref{fig:fig1}). P2, seated in pocket B, constrains a specific side chain
+and recovers well above the interior average ($0.64$ vs.\ $0.49$), whereas P$\Omega$, seated in pocket F,
+imposes a permissive backbone constraint and recovers significantly \emph{below} it ($0.19$ vs.\ $0.49$,
+$p=0.0054$). Both are structurally indispensable, yet only P2 gives a design model a signal it can
+exploit.
+
+To ask whether that asymmetry reflects side-chain identity alone or a coarser physicochemical preference,
+we compared each native anchor residue against its own peptide's interior positions on the
+Kyte-Doolittle hydrophobicity scale~\citep{kyte1982simple}, and separately scored every design for whether it preserved the
+native residue's side-chain class (Supplementary Figure~\ref{fig:supp12}). Both anchors are markedly more
+hydrophobic than the interior they sit alongside ($3.44$ at P2 and $3.65$ at P$\Omega$, against an
+interior mean of $0.79$; $p=0.0013$ and $p=0.0001$, paired Wilcoxon across 19 structures), confirming
+that both pockets recruit hydrophobic residues. The two anchors nonetheless part company on how tightly
+that preference is enforced in the designs. P2 designs preserve the native side-chain class well above
+the interior baseline ($85.6\%$ vs.\ $70.7\%$, $p=0.019$), whereas P$\Omega$ designs do not
+($62.4\%$ vs.\ $70.7\%$, $p=n.s.$), even though P$\Omega$ designs do show significantly reduced
+hydrophobicity variance relative to the interior ($p=0.041$). P$\Omega$ therefore behaves as a pocket
+that biases toward a hydrophobic character without fixing which hydrophobic residue satisfies it, which
+is what a low exact-identity recovery at a structurally load-bearing position should look like. 
+% We note
+% that a discrete side-chain classification counts cysteine as polar despite its hydrophobic
+% Kyte-Doolittle value, and four of the nineteen native peptides carry cysteine at P$\Omega$, so the
+% continuous scale is the more reliable of the two readouts here.
+
+\begin{figure*}[tb]
 \centering
-\makebox[0.39\textwidth][c]{\large\bfseries RECOVERY}\makebox[0.39\textwidth][c]{\large\bfseries CROSS-REACTIVE}\\[3pt]
-\includegraphics[width=0.78\textwidth]{../figures/fig2_recovery_crossing/fig2_recovery_crossing.png}\\[4pt]
-{\normalsize \sq{drgteal}~DRG \quad \sq{gigorange}~GIG \quad \sq{magenta}~design \quad \sq{mhcgrey}~MHC groove}
-\caption{\textbf{Recovery and crossing are register-specific, not generic proximity.} Each design is shown
-against both conformations, establishing that the match to its reported conformation is not simply ``close
-to either.'' \textbf{Left column (RECOVERY):} the recovering design (magenta) is 1.07\AA{} from its own
-target DRG (teal, top) but 2.75\AA{} from the non-target GIG (orange, bottom) --- inside the 310K DRG
-acceptance band (\S2.4). \textbf{Right column (CROSS-REACTIVE):} the closest de-novo crossing design
-(magenta) is 3.02\AA{} from its own cognate GIG (orange, top) --- the conformation it was \textit{not}
-trying to match --- but 1.44\AA{} from the DRG conformation it crossed into (teal, bottom; 1.03\AA{} to the
-single closest individual MD frame, discussed below), within the DRG band's 95\% confidence interval. Both
-designs sit substantially closer to the conformation they are credited with matching than to the
-alternative. Colour key (consistent across all panels): DRG teal, GIG orange, design magenta, MHC groove
-grey.}
-\label{fig:recovery-crossing}
+\includegraphics[width=\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_violin_summary_full.png}
+\caption{\textbf{Per-position recovery is bimodal, and the two MHC anchors diverge.} Recovery
+of the native residue, pooled across all 20 crystals and 4 models, one violin per peptide position
+(pMHC+TCR context). Individual points are colored by crystal.}
+\label{fig:fig1}
 \end{figure*}
 
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lcc}
-\toprule
-outcome & count/$N$ & rate (95\% CI) \\
-\midrule
-DRG recovery (6AMU), full pool & 4/8{,}722 & 0.046\% (0.01--0.12\%) \\
-DRG crossing (6AM5), full pool & 3/8{,}722 & 0.034\% (0.01--0.10\%) \\
-DRG recovery, fwd.\ subset & 4/4{,}214 & 0.095\% (0.03--0.24\%) \\
-DRG crossing, fwd.\ subset & 3/4{,}214 & 0.071\% (0.02--0.21\%) \\
-\bottomrule
-\end{tabular}
-\caption{Recovery and crossing rates, adjudicated on the DRG register (the well-converged 310K band,
-\S2.4), full de novo pool ($N=8{,}722$) and forward-threaded subset ($N=4{,}214$; \S2.3, \S3.4), counting
-designs within the band's 95\% CI, with Clopper--Pearson exact 95\% CIs. Unconditioned null control: 0/932.}
-\label{tab:rates}
-\end{table}
 
-\begin{table*}[t]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.05}
-\begin{tabular}{@{}llrrr@{\hskip 2em}llrrr@{}}
-\toprule
-scheme & class & 6AM5 & 6AMU & total & scheme & class & 6AM5 & 6AMU & total \\
-\midrule
-\texttt{k14}         & de novo & 607 & 610 & 1{,}217 & \texttt{k24}         & de novo   & 601 & 602 & 1{,}203 \\
-\texttt{L5\_max}     & de novo & 608 & 608 & 1{,}216 & \texttt{max}         & de novo   & 601 & 600 & 1{,}201 \\
-\texttt{L3\_nterm\_t2} & de novo & 608 & 606 & 1{,}214 & \texttt{fix0}        & templated & 605 & 607 & 1{,}212 \\
-\texttt{L4\_expanded} & de novo & 610 & 604 & 1{,}214 & \texttt{fix6}        & templated & 605 & 606 & 1{,}211 \\
-\texttt{k18}         & de novo & 609 & 602 & 1{,}211 & \texttt{fix2}        & templated & 600 & 607 & 1{,}207 \\
-\texttt{mhc\_tcr2}   & de novo & 606 & 605 & 1{,}211 & \texttt{fix4}        & templated & 601 & 605 & 1{,}206 \\
-\texttt{mhc\_tcr1}   & de novo & 604 & 604 & 1{,}208 & \texttt{fix8}        & templated & 601 & 604 & 1{,}205 \\
-\texttt{L1\_nterm}   & de novo & 601 & 606 & 1{,}207 & \texttt{null0}       & null      & 764 & 769 & 1{,}533 \\
-\texttt{L2\_nterm\_t1} & de novo & 602 & 604 & 1{,}206 & \texttt{xo\_nt5\_own} & crossover & 43  & 25  & 68 \\
-\texttt{tcr2}        & de novo & 602 & 603 & 1{,}205 & \texttt{xo\_nt4\_own} & crossover & 41  & 22  & 63 \\
-\texttt{mhc}         & de novo & 601 & 602 & 1{,}203 & \texttt{xo\_nt3\_own} & crossover & 40  & 21  & 61 \\
-\texttt{tcr1}        & de novo & 600 & 603 & 1{,}203 & \texttt{xo\_nt2\_own} & crossover & 31  & 21  & 52 \\
-                     &         &     &     &         & \texttt{xo\_nt4\_cross} & crossover & 26 & 21 & 47 \\
-                     &         &     &     &         & \texttt{xo\_nt2\_cross} & crossover & 26 & 21 & 47 \\
-\bottomrule
-\end{tabular}
-\caption{Designs generated per conditioning scheme, per crystal (6AM5 $=$ GIG context, 6AMU $=$ DRG
-context), across the complete converged campaign (24{,}831 designs total: 16{,}919 de novo, 6{,}041
-templated, 1{,}533 null, 338 crossover). The 20 primary schemes were each run to 600 designs per crystal;
-the crossover schemes are a lower-volume targeted mechanistic probe (\S3.6). The register statistics in
-Tables~\ref{tab:rates}--\ref{tab:best26} are adjudicated on the frozen de novo analysis pool ($N=8{,}722$);
-this table reports the full generation totals.}
-\label{tab:campaign}
-\end{table*}
+Averaged across the entire peptide, the four models fall within a narrow band of mean recovery ($0.41$
+to $0.47$ in full context and $0.28$ to $0.36$ without the TCR; Supplementary Figure~\ref{fig:supp5}),
+narrow enough that the models might appear indistinguishable by inspection. A Friedman test indicates
+otherwise in both contexts ($\chi^2=10.80$, $p=0.013$, full context; $\chi^2=12.18$, $p=0.007$, mhconly),
+so this apparent similarity reflects proximity in magnitude rather than statistical equivalence. As an
+aside, on 3QDG the central Gly-Ile-Gly motif at positions 4--6, well characterized in the literature~\citep{borbulevych2011tcrs},
+recovers essentially perfectly here ($1.00$, $0.73$, $1.00$ vs.\ $0.49$), though we have not attempted a
+systematic motif annotation across the full panel.
 
-All three criteria (proximity, anchor identity, depth) were satisfied simultaneously by each reported
-design; none is a marginal call on a single axis. The closest de-novo crossing design (C$\alpha$ RMSD
-1.44\AA{} to the alternate conformation's mean, correct anchor position, correct depth) is 1.03\AA{} from a
-specific frame sampled at 36.2ns into that conformation's MD trajectory --- closer to an observed thermal
-conformation than to the register's time-averaged structure.
+The relationship between resolution and recovery illustrates how pooling across a heterogeneous panel
+can understate a genuine effect. Pooled across all twenty distinct peptides, the correlation is modest,
+and only one model survives correction individually ($r=-0.49$ pooled, $p=0.030$; ESM-IF1 alone,
+$r=-0.63$, $p=0.003$; Supplementary Figure~\ref{fig:supp6}). However, four of the twenty structures
+(2P5W, 2BNR, 2F53, and 2F54) are independent crystals of the identical peptide (SLLMWITQC, the NY-ESO-1
+epitope~\citep{chen2005structural,sami2007high} differing primarily in resolution ($1.9$--$2.7$\,\AA). Holding
+peptide identity fixed in this
+way removes a confound that the pooled panel cannot, and the effect becomes unambiguous. Declining
+resolution drives recovery down for two of the four models ($r=-0.99$, $p=0.012$, ProteinMPNN (no MHC);
+$r=-0.97$, $p=0.031$, ESM-IF1) and drives unique design counts up for the remaining two ($r=0.97$,
+$p=0.028$, ProteinMPNN; $r=0.96$, $p=0.040$, ProteinMPNN (no MHC); Supplementary Figure~\ref{fig:supp7}).
+The pooled-panel estimate was therefore not incorrect, but diluted by heterogeneity.
 
-\begin{figure}[t]
+\subsection{Most peptides sampled by inverse-folding models are predicted to be presented}
+\label{sec:affinity}
+
+Having established the recovery rates of the native peptide and the sequence space each structure
+samples, we next asked whether those sampled peptides would actually be presented, scoring every unique
+design from the nineteen HLA-A*02:01 structures for predicted HLA-A2 binding with two unrelated
+predictors, MHCflurry~\citep{odonnell2020mhcflurry} and ESMCBA~\citep{esmcba,esmc2024}, neither of which had seen this panel (Figure~\ref{fig:fig2}).
+
+\begin{figure}[tb]
 \centering
-\includegraphics[width=\columnwidth]{../figures/fig5_md_cloud/fig5_closest_frame.png}
-\caption{\textbf{The closest crossing design against the single closest real MD snapshot.} Magenta: the
-closest de-novo crossing design (\texttt{6AM5\_L3\_nterm\_t2}, 1.44\AA{} to the DRG register). Gold: the
-individual 310K/50ns MD frame it is nearest to ($t=36.2$ns into the DRG trajectory, 1.03\AA{} away) --- an
-actual sampled thermal conformation, not the register's time-averaged mean (orange, faint, shown for
-reference at 1.44\AA{}). The two traces nearly
-coincide.}
-\label{fig:md-cloud}
+\includegraphics[width=0.5\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_esmcba_vs_mhcflurry_by_model.png}
+\caption{\textbf{MHCflurry and ESMCBA predictions of designs} log10(predicted
+IC50, nM) with pMHC+TCR context, one panel per model. Dashed lines mark the 500\,nM; The percentage is the fraction of designs under 500\,nM by both predictors at once.}
+\label{fig:fig2}
 \end{figure}
 
-\subsection{Conditioning breadth, not composition, gates the outcome}
+The two predictors agree closely on the same designs ($r=0.83$--$0.91$ per model in full context, up to
+$0.94$ without the TCR), and agreement between two methodologically unrelated predictors constitutes
+stronger evidence than either predictor alone. On this shared landscape, projected jointly into one UMAP
+embedding space~\citep{mcinnes2018umap} (Supplementary Figure~\ref{fig:supp11}), ProteinMPNN and LigandMPNN consistently sample
+toward higher predicted affinity than ESM-IF1. At the 500\,nM cutoff~\citep{sette1994relationship}, 61--78\% of ProteinMPNN-family and
+LigandMPNN designs qualify by MHCflurry, compared with 45\% for ESM-IF1 ($\chi^2=238.46$,
+$p=2\times10^{-51}$; see also Section~\ref{sec:tcr}). This pattern is better characterized as ESM-IF1 being a
+consistent low-affinity outlier than as a general superiority of ProteinMPNN over ESM-IF1, since the
+other three tools do not share this deficit.
 
-To isolate conditioning breadth and sampling depth from raw draw volume, \S3.2--3.3 draw on a controlled
-matched-attempt sub-campaign (equal draws per scheme, \S5) rather than on the full de novo corpus of \S3.1.
-Having established that recovery and crossing occur at all, the natural next question was whether the
-qualifying designs were spread evenly across the conditioning cells of that sub-campaign or concentrated in
-a particular kind of cell. Conditioning hotspot sets ranged from 3 residues (sparse) to 37--42 (rich). We
-evaluated whether the composition of ``rich'' cells reflected anything beyond generic contact frequency by
-computing, directly from the 6AM5 crystal structure, the number of peptide-proximal heavy-atom contacts
-($\leq$5\AA{}) per receptor residue:
-
-\begin{table}[t]
+\begin{figure*}[tb]
 \centering
-\small
-\begin{tabular}{lclc}
-\toprule
-residue & contacts & residue & contacts \\
-\midrule
-A167 & 10 & A70 & 6 \\
-E97 (TCR$\beta$) & 11 & A63 & 6 \\
-A147 & 9 & A67 & 5 \\
-A77 & 8 & A80 & 5 \\
-A159 & 8 & A97 & 5 \\
-A99 & 8 & A143 & 5 \\
-A66 & 8 & D30 (TCR$\alpha$) & 7 \\
-A155 & 7 & E96 (TCR$\beta$) & 4 \\
-\bottomrule
-\end{tabular}
-\caption{Peptide-proximal heavy-atom contact counts ($\leq$5\AA{}), 6AM5 crystal structure.}
-\label{tab:contacts}
-\end{table}
-
-Every hotspot used in the richer conditioning cells is among the top-ranked residues by this generic,
-distance-based metric; no residue included at the rich end reflects a curated or mechanistically distinct
-selection beyond higher raw contact count on both the MHC and TCR side. We therefore treat ``rich'' as
-``broad coverage of high-contact-degree residues'' rather than as a biologically distinguished category.
-
-Under this operationalization: designs from cells covering $\geq$9 high-contact-degree residues produced
-5/718 hits (0.70\%, 95\% CI 0.23--1.62\%); cells limited to the top 3--5 residues produced 0/587 (95\% CI
-0--0.63\%). Fisher's exact test: $p=0.068$ (Haldane--Anscombe-corrected OR$=9.06$, 95\% CI 0.50--164,
-reflecting the small event count). This result is suggestive rather than conclusive on its own, but is
-consistent with conditioning breadth being necessary, even though (\S3.3) it is not sufficient to predict
-which specific rich design succeeds.
-
-\subsection{Above the gate, sampling depth explains hit frequency}
-
-Conditioning breadth (\S3.2) explains why sparse cells never hit, but it does not by itself explain which
-\textit{rich} cell produces a hit and which does not --- the five qualifying designs came from only 3 of
-the many rich cells tested. To ask whether some rich conditioning schemes are simply better than others, we
-ran a fixed, matched campaign: 26 designs were generated under each of 8 different rich conditioning
-schemes (5--42 contacts, both crystals), all drawn before any cross-scheme comparison was made, so that no
-scheme could be favored by having received more attempts than another:
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{../figures/fig4_conditioning/fig4_conditioning.png}
-\caption{\textbf{Best design per rich conditioning, one panel each.} The best (closest-to-target) design
-(magenta) found for each of 6 rich conditioning cells (5--37 contacts), each overlaid on the native DRG
-target (orange) against the MHC groove (white surface). All six land at a similar distance from the
-target regardless of contact count --- the structural counterpart of the 0.49\AA{}-wide best-of-26 band in
-Table~\ref{tab:best26}. Restricted to the rich tier; combining with sparse-tier cells here would conflate
-the \S3.2 and \S3.3 comparisons.}
-\label{fig:fig4}
-\end{figure*}
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lcc}
-\toprule
-conditioning & contacts & best-of-26 (\AA{}) \\
-\midrule
-C9 & 9 & 2.06 \\
-C18 & 18 & 2.06 \\
-C5 & 5 & 2.24 \\
-C42 (6AMU) & 42 & 2.27 \\
-C37 (6AM5) & 37 & 2.28 \\
-C24 (6AM5) & 24 & 2.40 \\
-C18 (6AMU) & 18 & 2.42 \\
-C24 (6AMU) & 24 & 2.55 \\
-\bottomrule
-\end{tabular}
-\caption{Best-of-26 distance to target across 8 matched rich-conditioning cells.}
-\label{tab:best26}
-\end{table}
-
-All eight cells converge to a 0.49\AA{}-wide band regardless of a nearly 9-fold range in contact count.
-Extending the single best-performing cell (C9) from 26 to 133 draws did not improve on the original best
-(2.06\AA{} unchanged); the 107 additional draws contributed a worse best (2.36\AA{}) and substantially
-worse median (13.7\AA{} vs.\ 4.1\AA{} for the first 26) --- consistent with resampling a fixed distribution
-rather than converging toward the target.
-
-Across all 55 conditioning cells (not just the 8 in the controlled comparison), per-cell hit count
-correlated with per-cell draw count (Pearson $r=0.657$, $p<0.0001$). The single cell with the highest raw
-hit count (C18, combined across both crystals: 3/186 $=$ 1.61\%, vs.\ 2/1{,}119 $=$ 0.18\% for all other
-cells combined; Fisher's exact $p=0.023$) does not survive Bonferroni correction across the 55 cells
-examined (corrected $p=1.0$). We conclude that, conditional on clearing the conditioning-breadth gate
-identified in \S3.2, the identity of the conditioning scheme does not detectably predict outcome; the
-number of designs drawn does.
-
-\textit{A note on directional asymmetry.} The hit set contains 4 crossings and 1 recovery --- the opposite
-of what a hypothesis of ``conditioning biases toward its own target'' would predict. With $n=5$ total
-events, a two-sided exact binomial test cannot distinguish this split from 50/50 ($p=0.375$), so we do not
-read this as evidence of a directional bias one way or the other.
-
-\subsection{A threading artifact affects half of backbones and must be filtered}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{../figures/fig3_threading/fig3_threading.png}
-\caption{\textbf{Forward vs.\ reverse threading, structural overlay} (C18, 5 representative designs per
-panel, from a 186-design cohort). Native GIG peptide in teal (N-term/C-term labeled) against the MHC
-groove (white surface). Left panel: forward-threaded designs (sky blue) run N-to-C the same direction as
-the native peptide. Right panel: reverse-threaded designs (salmon) anchor the \textit{opposite} end in the
-same F-pocket --- the mirror-image backbone described in \S3.4, made directly visible rather than inferred
-from a distribution.}
+\includegraphics[width=0.85\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_delta_recovery_heatmap.png}
+\caption{\textbf{Where the TCR-context benefit actually concentrates.} Recovery(full) $-$
+recovery(mhconly), per crystal per model, crystals ordered by resolution (best to worst, left to right).}
 \label{fig:fig3}
 \end{figure*}
 
-The results in \S3.1--3.3 are already reported net of a correction we describe here. Early in this
-analysis, per-conditioning distributions of C$\alpha$ RMSD were consistently bimodal --- a near-native mode
-and a second, far mode roughly matched in size --- under every conditioning scheme inspected, regardless
-of contact count. Both native conformations anchor a C-terminal-half residue (P9 or P10) in the MHC
-F-pocket; tracing the far mode to its cause showed that, in the absence of any explicit directional
-constraint, de novo backbones instead anchor their N-terminal residue (P1--P4) in that same pocket in
-close to half of all draws (4{,}091 of 8{,}722 de novo backbones, 46.9\%, are reverse-threaded) --- a
-mirror-image backbone, not a genuine register variant, which raw
-C$\alpha$ RMSD to a crystal structure cannot distinguish from a poorly-folded forward-threaded design. This
-was quantified in two representative conditioning cells:
+\subsection{Without the TCR, inverse-folding models sample more widely but less confidently}
+\label{sec:tcr}
 
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{lccccc}
-\toprule
-conditioning & contacts & $N$ & forward & reverse & ambiguous \\
-\midrule
-C18 & 18 & 186 & 93 (50.0\%) & 87 (46.8\%) & 6 (3.2\%) \\
-C9 & 9 & 204 & 97 (47.5\%) & 92 (45.1\%) & 15 (7.4\%) \\
-\bottomrule
-\end{tabular}
-\caption{Threading classification, two representative conditioning cells.}
-\label{tab:threading}
-\end{table*}
+To understand the effect of the TCR on what these models propose, we resampled every structure with the
+TCR deleted from the input and compared the resulting designs against the full-complex designs above.
 
-Having already found in \S3.2--3.3 that conditioning breadth and identity shape whether recovery and
-crossing occur, we checked directly whether they also shape which way the backbone threads. Across all 36
-conditioning cells with a known hotspot count (3--37 contacts, $N=1{,}160$ designs), the forward-threaded
-fraction showed no relationship to contact count (Pearson $r=0.154$, $p=0.37$; Spearman $\rho=-0.019$,
-$p=0.91$) and stayed within a 40--58\% band at every contact-count tier tested. Threading direction is
-therefore independent of conditioning entirely, not merely similar between the two cells shown above.
-Per-position deviation profiles for the forward and reverse sub-populations are approximately mirror
-images of one another; pooling them without this classification produces a spurious ``elevated deviation
-at both termini'' signature that is an artifact of population mixing rather than a genuine failure mode.
-All recovery/crossing statistics in \S3.1--3.3 are reported on the forward-threaded subset ($N=600$) for
-this reason.
+Every model explores substantially more sequence space without the TCR, with unique design counts roughly
+doubling or tripling (ProteinMPNN 1081 $\to$ 3671; ProteinMPNN (no MHC) 958 $\to$ 2362; ESM-IF1 1069 $\to$
+1865; LigandMPNN 668 $\to$ 2111; Supplementary Figure~\ref{fig:supp5}). This larger space skews toward
+higher predicted affinity, but not uniformly across models. ProteinMPNN (no MHC) shows the largest shift
+(strong-binder rate 77.5\%$\to$95.2\%), LigandMPNN a smaller but genuine one ($61.1\%\to70.7\%$), while
+ProteinMPNN and ESM-IF1 show little change (Supplementary Figure~\ref{fig:supp10}). The affinity gain
+associated with TCR removal thus appears concentrated in the two models already most context-sensitive,
+rather than reflecting a general consequence of removing the TCR.
 
-\subsection{Templating, not contacts, controls a localized register signal}
+A related but distinct signal comes from each model's own confidence in the sequences it designs,
+independent of either external predictor. ProteinMPNN and ProteinMPNN (no MHC) report an average
+per-residue negative log-likelihood for each design, for which lower values indicate higher confidence;
+LigandMPNN reports an overall confidence score, for which higher values indicate higher confidence.
+Pooled across all nineteen HLA-A*02:01 structures, removing the TCR shifts this internal score for every
+model, and in every case toward lower self-assessed confidence (ProteinMPNN mean $1.016\to1.295$;
+ProteinMPNN (no MHC) $0.925\to1.128$; LigandMPNN $0.413\to0.321$; Mann-Whitney $p<10^{-200}$ for all
+three; Supplementary Figure~\ref{fig:supp9a}). This shift is not uniform across the panel. Broken out per
+structure and Bonferroni-corrected, it reaches significance in 15--17 of 19 structures depending on the
+model, but not in the remaining two to four (Supplementary Figure~\ref{fig:supp9b}). That a model can
+become less confident in its own designs by its own internal metric while simultaneously being scored as
+a stronger binder by an external predictor that never saw those designs indicates that the two signals
+are not redundant, since one reflects how comfortably a sequence fits the model's learned distribution, the
+other how likely it is to bind, and removing the TCR does not move them the same way. This distinction is
+more informative than amino-acid-level recovery or composition alone, since it speaks to what the model
+itself, not just an external predictor, "believes" about the sequences it is generating.
 
-Sections 3.2--3.4 establish \textit{when} recovery and crossing occur (broad conditioning, \S3.2), and
-what does not further explain their rate (which specific rich scheme is used, \S3.3, or backbone
-threading, \S3.4) --- but not \textit{why} contact conditioning plateaus at all. To test this directly we
-ran a separate experiment: instead of conditioning on receptor-side contacts, we fixed an explicit
-fraction of the native peptide backbone itself as a structural template and let RFdiffusion generate only
-the remainder. Register recovery scaled sharply with the fraction of geometry supplied this way:
+\subsection{Recovery Loss Concentrates at Experimentally Validated TCR-Contact Positions}
+\label{sec:skempi}
 
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{lcccccc}
-\toprule
-residues templated (of 10) & 10 & 8 & 6 & 4 & 2 & 0 \\
-\midrule
-median C$\alpha$ RMSD to own conformation (\AA{}) & 0.07 & \textbf{0.42} & 0.89 & 2.06 & 2.42 & $\sim$14.1 \\
-\bottomrule
-\end{tabular}
-\caption{Register recovery vs.\ fraction of native peptide backbone directly templated.}
-\label{tab:templating}
-\end{table*}
+To understand how these residue interactions contribute functionally to TCR binding, we tested whether
+the recovery lost without the TCR concentrates at positions that experimental data already implicate in
+receptor engagement. We cross-referenced SKEMPI 2.0~\citep{jankauskaite2019skempi} and IEDB~\citep{vita2019iedb} against each structure's
+crystallized TCR clone (matched by CDR3 sequence) and identified 21 (structure, position) pairs with an
+experimentally measured mutation that alters TCR binding. Pooling recovery across exactly these
+positions, TCR-present designs recover the native residue $54$--$58\%$ of the time, compared with
+$34$--$38\%$ for TCR-absent designs (Figure~\ref{fig:fig3}), a consistent, though not universal, gap; a
+minority of individual positions move in the opposite direction.
 
-Templating 8/10 residues recovers register to sub-thermal precision (0.42\AA{} median, tighter than the
-native peptide's own $\sim$0.9\AA{} thermal envelope at 310K). By contrast, contact-hotspot count alone --- up to
-42 residues, exceeding the information content of the 8-residue geometric case by residue count --- does
-not break a $\sim$2--2.5\AA{} floor, and hotspot count does not correlate with recovery quality (Spearman
-$\rho\approx0.17$, not significant; note the \texttt{fix0} level of this same ladder, which retains the
-\textit{full} rich hotspot list but zero template, is the worst-performing level at $\sim$11.4\AA{} median
---- direct evidence that hotspot conditioning by itself, at its richest, does not recover the target
-conformation). We interpret this as reflecting distinct mechanisms of action: a contact hotspot biases the
-predicted position of a \textit{neighboring}, receptor-facing residue, but does not directly constrain a
-peptide residue's own backbone dihedral angles --- the coordinate on which register is actually encoded.
-
-This localization is direct and measurable: per-residue deviation between the two native conformations,
-expressed in native-MD thermal-fluctuation units ($z=$ inter-conformation separation / native positional
-RMSF at that position), rises from statistical noise at the N-terminus to a pronounced signal at the
-C-terminal anchor ($z=0.6$ at P1; 1.3 at P4; 4.9 at P7; 8.1 at P8; 8.5 at P9; 14.5 at P10), with native MD
-RMSF at these C-terminal positions remaining tight ($\approx$0.37\AA{}), confirming the signal reflects
-genuine geometric separation rather than amplified noise. This motivates the anchor-identity-based scoring
-used throughout (\S2.3): a whole-peptide-averaged RMSD dilutes this sharp, spatially confined signal across
-five register-neutral N-terminal positions.
-
-\subsection{Null/background campaign: the completed control admits no accepted design}
-
-Sections 3.1--3.5 compare conditioning schemes to one another, but do not by themselves establish how the
-recovery and crossing rates compare to a fully unconditioned RFdiffusion draw. To measure that background
-directly, we generated a dedicated campaign of 932 de novo backbones (\texttt{null0}, \S2.5) with the
-receptor held fixed as structural context but \textbf{no} \texttt{ppi.hotspot\_res} and no peptide template.
-
-Scored with the \textit{identical} three-criterion pipeline applied to the main corpus and adjudicated
-against the same 310K DRG band, \textbf{0 of 932} unconditioned draws pass the joint acceptance test
-(Clopper--Pearson 95\% CI 0--0.40\%). The more informative observation is \textit{how} they fail. Taken one
-criterion at a time, the two register-defining gates each admit background: the F-pocket anchor-identity
-criterion alone is met by 114/932 draws (12.2\%), the burial-depth criterion alone by 42/932 (4.5\%), and
-the two together by 10/932 --- while the conformational-proximity gate and the full three-criterion
-conjunction each admit \textbf{none}. The null thus supplies an empirical, not merely first-principles
-(\S2.3), justification for the joint test's stringency: no single register-defining criterion is clean, and
-only requiring all three jointly yields a zero background --- precisely the false-positive failure mode the
-joint test is built to reject.
-
-The unconditioned draws land well outside the envelope (Fig.~\ref{fig:figS}), and the two scaffolds differ
-in how far: the 6AM5-context draws never approach the groove (register undefined), while the 6AMU-context
-draws come closer but remain outside the DRG band. Even the closest unconditioned draw is farther from its native
-conformation than every accepted de novo design in \S3.1. The conclusion this baseline supports is
-deliberately narrow: in-register groove geometry does not arise as a zero-conditioning background artifact.
-This baseline is silent on register \textit{selection} (whether conditioning steers the cognate versus the
-alternate register), which is addressed separately in \S3.5.
-
-This completed control (Clopper--Pearson 95\% CI for 0/932: 0--0.40\%; Fisher's exact vs.\ the de novo
-recovery/crossing rate) confirms that contact conditioning provides real
-information above a zero-information background. We note that the \texttt{fix0} templating-ladder cells
-(full hotspot list, zero template; \S3.5) are \textit{not} a substitute for this measurement, since they
-still carry the richest hotspot conditioning tested anywhere in this corpus --- they are a
-positive-conditioning control, not a null.
 
 \section{Discussion}
+Inverse-folding models have rapidly advanced structure-based protein design~\citep{dauparas2022proteinmpnn,hsu2022esmif,dauparas2025ligandmpnn}, and their ability to recover native interface residues above chance~\citep{ribeirofilho2024exploring} invites the question of whether they capture the biophysics of an interface or merely reproduce its most constrained positions. High recovery is easily read as the former. Our results point to the latter, since knowing that MHC anchor positions matter explains little on its own. P2 and P$\Omega$ are both structurally indispensable yet behave oppositely under inverse folding, one a side-chain readout, the other a backbone constraint tolerant of many side chains. This finer distinction is what a sequence-design model can meaningfully report.
+The same caution against pooling applies to resolution, where a weak correlation across twenty distinct peptides conceals a model-specific effect once peptide identity is controlled for, using the four SLLMWITQC/NY-ESO-1 crystals as a same-peptide replicate set. TCR removal resists a single verdict for the same reason. Diversity increases for every model, affinity for two, and recovery decreases on average but not everywhere, because whether the model requires the TCR was never one question.
 
-Three findings jointly define the current capability boundary. First, recovery and crossing of peptide
-register by contact-conditioned de novo backbone generation are real, structurally validated events, not
-statistical noise or scoring artifacts --- each reported design passes an independent three-criterion test
-referenced against thermal motion rather than a static target. Second, achieving either outcome appears to
-require a minimum breadth of conditioning (coverage of high-contact-degree residues on both the MHC and
-TCR side), but not a specific curated subset of them --- the operative variable is coverage, not
-composition. Third, once that breadth is present, outcome frequency is governed by how many designs are
-sampled rather than by which qualifying conditioning is chosen --- a result that reframes the practical
-question from ``which contacts should be used'' to ``how much sampling budget is available,'' a
-comparatively more tractable lever.
+% \section{Limitations and scope}
+% \label{sec:limitations}
 
-The mechanistic account in \S3.5 is consistent with this picture: contact hotspots constrain a
-\textit{neighboring} residue's predicted position without directly constraining a peptide residue's own
-backbone torsions, so increasing contact count broadens the region of conformational space the model is
-nudged toward without narrowing precision at the specific coordinate (anchor-residue backbone geometry)
-that defines register. Direct geometric templating, which supplies that coordinate explicitly, achieves
-sub-thermal precision at 8/10 residues --- an upper bound on what the architecture can represent, distinct
-from what contact-only conditioning can currently retrieve.
+% \begin{itemize}
+% \item \textbf{$T{=}0.1$ only.}
+% \item \textbf{Allele skew.} Nineteen of twenty structures are HLA-A*02:01; the one exception (4MJI,
+% HLA-B*51:01) is also the hardest structure in the panel by recovery, and with $n=1$ we cannot separate
+% allele identity from TCR identity or structure-specific difficulty.
+% \item \textbf{Predicted affinity is not measured affinity.} Agreement between MHCflurry and ESMCBA
+% constitutes real evidence, but neither substitutes for an experimental binding assay.
+% \item \textbf{Not all TCR-binding evidence decouples MHC loading from TCR engagement equally well.} Only
+% SPR-based dissociation-constant measurements are performed on an already-folded pMHC complex; functional
+% assays (cytotoxicity, activation) cannot distinguish a peptide that ceased binding MHC from one that
+% ceased being recognized by the TCR.
+% \item \textbf{Recovery is not validated binding.} It measures agreement with a crystallized peptide, not
+% experimentally confirmed activity of the designed sequences.
+% \item \textbf{The MEL5/ELAGIGILTV case study is outside the 20-structure panel} and uses a separate,
+% earlier design campaign; it's a sharper single-structure illustration, not panel-scale evidence.
+% \end{itemize}
 
-The N$\rightarrow$C threading artifact (\S3.4) --- that roughly half of all unconstrained backbones bury
-the mirror-image terminus in the anchor pocket, invisible to raw C$\alpha$ RMSD --- is a genuine,
-transferable caution for anyone scoring de novo peptide backbones by RMSD alone, independent of the
-specific recovery/crossing rates reported here. The completed null-baseline experiment (\S3.6) establishes
-that the observed de novo recovery/crossing rate exceeds a true zero-information background (0/932), which
-the tier comparisons in \S3.2--3.3 cannot by themselves resolve.
+% \section{Data and code availability}
+% \label{sec:data}
 
-\section{Limitations and scope}
+\FloatBarrier
+\bibliography{references}
 
-\begin{itemize}
-\item \textbf{Backbone (C$\alpha$) scope only.} No sequence-, side-chain-, or rotamer-level claim is made;
-RFdiffusion's output at this stage carries no designed sequence, and any downstream ProteinMPNN
-sequence-design results are a separate body of work not represented here. This analysis deliberately stops
-at backbone generation and does not run ProteinMPNN.
-\item \textbf{Calibration convergence.} The 310K acceptance thresholds (\S2.4) derive from a single 50ns
-MD trajectory per register, and the two runs differ in convergence: the DRG (6AMU) run is well sampled
-(integrated autocorrelation time 1.9ns, effective sample size $\approx$13) but the GIG (6AM5) run is not
-($\approx$2), which is why redirection is adjudicated only against the DRG band and why acceptance
-thresholds are reported with block-bootstrap 95\% confidence intervals rather than as point values. We expect
-further simulation to refine these thresholds rather than overturn the qualitative result, given the
-margin by which the reported designs clear them, but exact \AA{} cutoffs should be treated as current-best
-rather than final.
-\item \textbf{Small absolute event counts.} Although the null baseline is now complete (0/932, \S3.6), the
-de novo recovery and crossing counts themselves remain small (7 designs within the DRG band's 95\% CI over
-8{,}722 draws), so the corpus-wide rates carry wide confidence intervals and are reported with them
-throughout; they should be read as establishing that these events occur above background, not as precise
-frequency estimates.
-\item \textbf{Overlapping campaign membership.} 16 of the 55 conditioning cells pool draws from more than
-one campaign launched at different times (\S2.2); this is disclosed for transparency and is consistent
-with, not a threat to, the draw-count correlation reported in \S3.3.
-\item \textbf{Controlled breadth/depth sub-experiments.} The conditioning-breadth (\S3.2) and
-sampling-depth (\S3.3) dissections are conducted on a separate controlled matched-attempt sub-campaign
-(equal draws per scheme, to isolate those variables) rather than on the full de novo corpus of \S3.1, and
-rest on small qualifying-design counts within it; the rich-vs-sparse and C18-specific comparisons carry
-correspondingly wide confidence intervals and should be read as suggestive rather than conclusive.
-\item \textbf{Single system.} All results pertain to one TCR--pMHC pair, one class-I allele, and one force
-field; no claim is made regarding generalization to other cross-reactive systems, TCRs, or HLA alleles.
-\end{itemize}
+\FloatBarrier
+\appendix
+\section{Supplementary Figures}
 
-\section{Data and code availability}
-
-Design generation, scoring, and MD analysis scripts are maintained in the project repository
-(\texttt{py/score\_denovo\_designs.py} for register scoring and threading classification;
-\texttt{py/native\_md\_components.py} for MD trajectory processing; \texttt{jobs/} for RFdiffusion campaign
-drivers, including \texttt{jobs/run\_null\_baseline.sh} for the \S3.6 null/background campaign).
-Corresponding analysis notebooks (numbered \texttt{00}--\texttt{16}, grouped by methodology) are indexed in
-\texttt{ANALYSIS\_WALKTHROUGH.md}; the MD-calibrated baseline and joint acceptance test underlying
-\S2.3--2.4 and \S3.1 are implemented in \texttt{01\_md\_calibrated\_baseline.ipynb}.
-
-\section*{Supplementary Material}
-
-\begin{figure}[h]
+\begin{table*}[p]
+\renewcommand{\thetable}{S1}
 \centering
-\includegraphics[width=\columnwidth]{../figures/figS_distance_distributions/figS_distance_distributions.png}
-\caption{\textbf{Distribution of C$\alpha$ RMSD to the alternate (crossing-target) register across design
-classes, per crystal.} Density histograms for de novo (contact-conditioned), random (no hotspots, no
-template), and fixed (templated) backbones. The shaded region marks the 310K native acceptance band with
-its block-bootstrap 95\% confidence interval (\S2.4); for 6AM5 designs the target is the well-converged DRG
-band ($\leq$1.48\AA{}, CI 1.36--1.58), the register into which all observed de novo crossings fall. Vertical
-lines mark the individual de novo designs judged as crossing (within the DRG band's 95\% CI: 1.44, 1.52,
-1.54\AA{}) and the de novo recoveries. Every design class places the overwhelming majority of its mass well
-beyond the band; only a handful of contact-conditioned designs reach its edge, and the random control
-places none there. The 6AMU$\rightarrow$GIG panel is shown for completeness against the under-sampled GIG
-band (ESS $\approx$2, \S2.4) and is not used to adjudicate redirection.}
-\label{fig:figS}
-\end{figure}
+\small
+\begin{tabular}{lllll}
+\toprule
+PDB & Peptide & Length & Allele & Resolution (\AA) \\
+\midrule
+2P5W & SLLMWITQC & 9 & HLA-A*02:01 & 2.20 \\
+1QSF & LLFGYPVAV & 9 & HLA-A*02:01 & 2.80 \\
+1QRN & LLFGYAVYV & 9 & HLA-A*02:01 & 2.80 \\
+2BNR & SLLMWITQC & 9 & HLA-A*02:01 & 1.90 \\
+2GJ6 & LLFGKPVYV & 9 & HLA-A*02:01 & 2.56 \\
+2F53 & SLLMWITQC & 9 & HLA-A*02:01 & 2.10 \\
+2F54 & SLLMWITQC & 9 & HLA-A*02:01 & 2.70 \\
+3QDG & ELAGIGILTV & 10 & HLA-A*02:01 & 2.69 \\
+3QEQ & AAGIGILTV & 9 & HLA-A*02:01 & 2.59 \\
+3QFJ & LLFGFPVYV & 9 & HLA-A*02:01 & 2.29 \\
+3GSN & NLVPMVATV & 9 & HLA-A*02:01 & 2.80 \\
+1OGA & GILGFVFTL & 9 & HLA-A*02:01 & 1.40 \\
+3UTS & ALWGPDPAAA & 10 & HLA-A*02:01 & 2.71 \\
+5C0A & MVWGPDPLYV & 10 & HLA-A*02:01 & 2.46 \\
+5C0B & RQFGPDFPTI & 10 & HLA-A*02:01 & 2.03 \\
+5HHO & GILEFVFTL & 9 & HLA-A*02:01 & 2.95 \\
+5EU6 & YLEPGPVTV & 9 & HLA-A*02:01 & 2.02 \\
+2VLR & GILGFVFTL & 9 & HLA-A*02:01 & 2.30 \\
+4MJI & TAFTIPSI & 8 & HLA-B*51:01 & 2.99 \\
+5NME & SLYNTVATL & 9 & HLA-A*02:01 & 2.94 \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{The twenty-structure panel.} PDB accession, native peptide,
+peptide length, MHC allele, and crystallographic resolution for every structure in the panel.}
+\label{tab:pdblist}
+\end{table*}
+
+\begin{table*}[p]
+\renewcommand{\thetable}{S2}
+\centering
+\small
+\begin{tabular}{@{}lcp{4.2cm}p{5.2cm}p{2.6cm}@{}}
+\toprule
+Model & Params & Architecture & Training data & Predicted structures \\
+\midrule
+ProteinMPNN & 1.66M & Message-passing GNN & PDB (\texttt{pdb\_2021aug02}), general backbones & -- \\[2pt]
+ProteinMPNN (no MHC) & 1.66M & Message-passing GNN (identical to above) & Same corpus, MHC/TCR-class structures excluded & -- \\[2pt]
+ESM-IF1 & 141.7M & GVP-GNN + transformer & CATH-derived backbones & +12M AF2 structures \\[2pt]
+LigandMPNN & 2.62M & Message-passing GNN + ligand context & PDB, augmented with explicit ligand/heteroatom context & -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Models compared.} Parameter counts verified directly from each
+checkpoint's \texttt{state\_dict}. ESM-IF1 is the only tool whose training set is built substantially
+from AlphaFold2-predicted structures~\citep{jumper2021alphafold} rather than solved crystal structures ($\sim$12M predicted backbones,
+on top of its CATH-derived crystal set~\citep{sillitoe2021cath}).}
+\label{tab:models}
+\end{table*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S1a}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_peptide_length_dist.png}
+\caption{\textbf{Peptide length distribution} across all 20 structures in the
+panel.}
+\label{fig:supp1a}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S1b}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_resolution_dist.png}
+\caption{\textbf{Crystallographic resolution per structure.}}
+\label{fig:supp1b}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S1c}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel1_dataset_presentation/fig_panel1_mhc_contact_density.png}
+\caption{\textbf{MHC residue vs.\ peptide contact density,} pooled across all 20 structures.}
+\label{fig:supp1c}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S2}
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_total_vs_unique_full.png}
+\caption{\textbf{Extreme redundancy at $T{=}0.1$.} 10,000 raw draws per
+(structure, model); the unique fraction is $0.50\%$ on average and never exceeds a few percent.}
+\label{fig:supp2}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S3}
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logos_full.png}
+\caption{\textbf{Design sequence logos, pooled by peptide length, one column per
+model.}}
+\label{fig:supp3}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S4a}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_vanilla.png}
+\caption{\textbf{Per-structure design logos, ProteinMPNN.} All 20 structures,
+ordered by native peptide then resolution.}
+\label{fig:supp4a}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S4b}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_noMHC.png}
+\caption{\textbf{Per-structure design logos, ProteinMPNN (no MHC).}}
+\label{fig:supp4b}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S4c}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_ESM-IF1.png}
+\caption{\textbf{Per-structure design logos, ESM-IF1.}}
+\label{fig:supp4c}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S4d}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_design_logo_grid_LigandMPNN.png}
+\caption{\textbf{Per-structure design logos, LigandMPNN.}}
+\label{fig:supp4d}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S5}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel2_design_presentation/fig_panel2_unique_per_model_meanstd.png}
+\caption{\textbf{Unique designs per model, mean $\pm$ SD across structures,}
+pMHC+TCR vs.\ pMHC only.}
+\label{fig:supp5}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S6}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_recovery_vs_resolution_and_unique.png}
+\caption{\textbf{Resolution and unique-design count vs.\ mean recovery, pooled
+across the full 20-structure panel.} $r=-0.49$ ($p=0.030$) and $r=0.45$ ($p=0.049$), $n=20$.}
+\label{fig:supp6}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S7}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel4_replicate_structures/fig_panel4_full_panel_recovery_vs_quality.png}
+\caption{\textbf{Resolution dependence in a controlled, same-peptide replicate
+set.} Four structures (2P5W, 2BNR, 2F53, 2F54), identical native peptide, near-identical TCR clone; every
+model plotted separately.}
+\label{fig:supp7}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S8a}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_esmcba_vs_mhcflurry_by_model_mhconly.png}
+\caption{\textbf{ESMCBA vs.\ MHCflurry agreement, pMHC-only designs,}
+by model.}
+\label{fig:supp8a}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S8b}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel3_recovery_presentation/fig_panel3_recovery_vs_resolution_and_unique_by_model.png}
+\caption{\textbf{Per-model resolution/design-count relationship,} full panel.}
+\label{fig:supp8b}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S9a}
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_own_score_shift_pooled.png}
+\caption{\textbf{Each model's own confidence score for its designs shifts when
+the TCR is removed,} pooled across all nineteen HLA-A*02:01 structures. ProteinMPNN and ProteinMPNN (no
+MHC): average per-residue negative log-likelihood, lower is more confident. LigandMPNN: overall
+confidence, higher is more confident. All three shift toward lower self-assessed confidence without the
+TCR (Mann-Whitney $p<10^{-200}$ in all three cases).}
+\label{fig:supp9a}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S9b}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_own_score_shift_by_structure.png}
+\caption{\textbf{The own-score shift is not uniform across the panel.}
+Bonferroni-corrected significance (full vs.\ mhconly) per structure per model; dark cells are structures
+where the model's own-score distribution did not shift.}
+\label{fig:supp9b}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S10}
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_strong_binder_rate_by_model.png}
+\caption{\textbf{Removing the TCR raises predicted affinity, mostly for two of
+the four models.} Strong-binder rate (MHCflurry IC50 $<$ 500\,nM), full vs.\ pMHC-only context, Wilson
+95\% CI. ProteinMPNN (no MHC) and LigandMPNN both shift up substantially without the TCR; ProteinMPNN
+and ESM-IF1 barely move. ESM-IF1 is the lowest-affinity model in both conditions.}
+\label{fig:supp10}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S11}
+\centering
+\includegraphics[width=\textwidth]{figures/fig_panel6_mhcflurry_esmcba_umap/fig_panel6_umap_2x3.png}
+\caption{\textbf{The sampled sequence space, colored by predicted binding
+affinity.} One UMAP (ESMCBA embeddings, fit jointly over every unique design), recolored six ways. All
+four models occupy the same overlapping landscape rather than four separate clusters, and MHCflurry and
+ESMCBA, built differently and trained differently, trace the identical gradient across it.}
+\label{fig:supp11}
+\end{figure*}
+
+\begin{figure*}[p]
+\renewcommand{\thefigure}{S12}
+\centering
+\includegraphics[width=0.62\textwidth]{figures/fig_panel7_chemistry/fig_panel7_native_anchor_hydrophobicity.png}
+\caption{\textbf{Both MHC anchors are more hydrophobic than the peptide interior they sit alongside.}
+Kyte-Doolittle hydrophobicity of the native residue at P2 and P$\Omega$ for each of the 19 HLA-A*02:01
+structures, plotted against that same peptide's mean over its own interior positions (P3 through the
+second-to-last, excluding P1). Grey lines connect the three values belonging to one peptide; anchor
+points are colored by side-chain class. Both anchors sit well above their own interior
+(paired Wilcoxon, $p=0.0013$ for P2 and $p=0.0001$ for P$\Omega$, $n=19$), so the two pockets do not
+differ in whether they prefer hydrophobic residues. They differ in how strictly the designs honor that
+preference, which is the distinction reported in Section~\ref{sec:recovery}. The four points at
+P$\Omega$ colored as polar are the cysteine-terminated SLLMWITQC/NY-ESO-1 replicates, a residue whose
+discrete classification understates its hydrophobicity.}
+\label{fig:supp12}
+\end{figure*}
 
 \end{document}
