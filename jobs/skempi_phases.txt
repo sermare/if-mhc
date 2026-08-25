@@ -1,7 +1,0 @@
-# Ordered run plan: <dataset> <temperature>. The keeper submits the next line's
-# keeper when the current phase drains, so the whole plan runs unattended.
-skempi 0.1
-skempi 0.3
-pmhc25 0.3
-focus6am 0.1
-focus6am 0.3
