@@ -91,10 +91,15 @@ def main():
     else:
         chains = pdb_chain_seqs(f"{SK}/arm_{a.arm}/{a.complex}.pdb")
         nat_parts = recs[0][1].split(":")
-        if [len(s) for _, s in chains] != [len(p) for p in nat_parts]:
+        # LigandMPNN emits chains sorted by chain id, which is NOT the order they
+        # appear in the file (3GSN is H,P,L,A,B on disk but A,B,H,L,P in the
+        # fasta). Sorting here matches its convention; the length check below
+        # then confirms the mapping rather than assuming it.
+        chains = sorted(chains, key=lambda t: t[0])
+        if [len(sq) for _, sq in chains] != [len(p) for p in nat_parts]:
             raise SystemExit(
                 f"chain-order mismatch for {a.complex}/{a.arm}: "
-                f"pdb={[(c, len(s)) for c, s in chains]} fasta={[len(p) for p in nat_parts]}")
+                f"pdb={[(c, len(sq)) for c, sq in chains]} fasta={[len(p) for p in nat_parts]}")
         pep_idx = [c for c, _ in chains].index(pep_ch)
         if nat_parts[pep_idx][:pep_len] != pep_seq:
             raise SystemExit(

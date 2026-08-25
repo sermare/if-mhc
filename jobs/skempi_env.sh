@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# HARD KILL-SWITCH: remove outputs/skempi_if/HALT to re-enable the fleet.
+# This file is sourced (not exec'd) by every keeper and worker, so `exit` here
+# stops the sourcing job before it can run work or submit anything further.
+if [ -f /global/scratch/users/sergiomar10/if-mhc/outputs/skempi_if/HALT ]; then
+  echo "[skempi_env] HALT flag present -- refusing to start"; exit 0
+fi
 # Shared environment for the SKEMPI TCR/pMHC inverse-folding runs.
 # EVERYTHING caches to scratch -- nothing may be written under $HOME.
 # Source this at the top of every skempi_* job script.

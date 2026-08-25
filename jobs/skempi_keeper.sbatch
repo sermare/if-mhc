@@ -26,11 +26,29 @@ SLEEP="${SLEEP:-120}"
 RESUB_AT=$((3*3600 + 1800))
 log(){ echo "[$(date '+%F %T')] keeper $*"; }
 
+# Submit a replacement keeper only if this phase has none queued. Guards against
+# the runaway that produced ~30k queued keepers: any path that resubmits must go
+# through here, and it submits ONE task, never an array.
+resubmit_keeper(){   # $1=dataset $2=temp
+  local n
+  n=$(squeue -h -r -u "$USER" -n skkeep -t PD,R 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${n:-0}" -gt "${MAX_KEEPERS:-4}" ]; then
+    log "NOT resubmitting: $n keepers already queued (cap ${MAX_KEEPERS:-4})"
+    return 0
+  fi
+  sbatch --array=0-0 --export=ALL,SK_DATASET="$1",SK_TEMP="$2" "$SELF" >/dev/null 2>&1 || true
+  log "handed off to a single replacement keeper for $1/T$2"
+}
+
+
 # only one keeper acts; a second stays hot and takes over if this one is preempted
 exec 9>"$OUTDIR/keeper.${SK_DATASET:-skempi}.T${SK_TEMP:-0.1}.lock"
 while ! flock -n 9; do
   [ -f "$OUTDIR/COMPLETE.${SK_DATASET:-skempi}.T${SK_TEMP:-0.1}" ] && exit 0
-  if [ "$SECONDS" -ge "$RESUB_AT" ]; then sbatch --array=0-1 --export="$PHASE_ENV" "$SELF" >/dev/null 2>&1 || true; exit 0; fi
+  # a standby must never resubmit: with 2 array tasks both resubmitting an
+  # --array=0-1 replacement, the keeper population doubles every cycle. Only
+  # the lock holder below is allowed to hand off.
+  if [ "$SECONDS" -ge "$RESUB_AT" ]; then log "standby reached walltime -- exiting (active keeper hands off)"; exit 0; fi
   log "standby (another keeper holds the lock)"; sleep 90
 done
 log "ACTIVE on $(hostname) CAP=$CAP LOWWATER=$LOWWATER"
@@ -56,7 +74,7 @@ while true; do
     if [ -n "$nxt" ]; then
       nd=$(echo "$nxt" | awk '{print $1}'); nt=$(echo "$nxt" | awk '{print $2}')
       log "next phase: $nd/T$nt -> launching keeper + workers"
-      sbatch --array=0-1 --export=ALL,SK_DATASET="$nd",SK_TEMP="$nt" "$SELF" >/dev/null 2>&1 || true
+      resubmit_keeper "$nd" "$nt"
       sbatch --array=0-119 --export=ALL,SK_DATASET="$nd",SK_TEMP="$nt" "$WORKER" >/dev/null 2>&1 || true
     else
       log "run plan finished -- no further phases"
@@ -74,7 +92,7 @@ while true; do
 
   if [ "$SECONDS" -ge "$RESUB_AT" ]; then
     log "near walltime -> hand off to a fresh keeper"
-    sbatch --array=0-1 --export="$PHASE_ENV" "$SELF" >/dev/null 2>&1 || true
+    resubmit_keeper "$SK_DATASET" "$SK_TEMP"
     exit 0
   fi
   sleep "$SLEEP"
