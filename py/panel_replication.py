@@ -18,7 +18,14 @@ import pandas as pd
 from scipy import stats
 
 ROOT = "/global/scratch/users/sergiomar10/if-mhc"
-DES = f"{ROOT}/designs/skempi/t01"
+# Phase selection: which (dataset, temperature) run to analyse. Defaults to the
+# T=0.1 SKEMPI phase so existing invocations keep working; set SK_DATASET /
+# SK_TEMP to point the same analysis at another phase.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+TAG = "t" + TEMP.replace(".", "")
+SUF = f"_{DATASET}_T{TEMP}"
+DES = f"{ROOT}/designs/{DATASET}/{TAG}"
 AA = "ACDEFGHIKLMNPQRSTVWY"
 MODELS = ["esmif", "proteinmpnn", "proteinmpnn_nomhc", "ligandmpnn"]
 
@@ -44,6 +51,7 @@ for m in MODELS:
         frames.append(d)
 df = pd.concat(frames, ignore_index=True)
 df["seq"] = df.seq.astype(str); df["native"] = df.native.astype(str)
+print(f"PHASE {DATASET}/T{TEMP}")
 print(f"loaded {len(df):,} designs, {df['complex'].nunique()} complexes, "
       f"{df.model.nunique()} models, arms={sorted(df.arm.unique())}")
 
@@ -68,7 +76,7 @@ for (cid, m, arm), g in df.groupby(["complex", "model", "arm"]):
                              native_aa=nat[i], recovery=recov, chem_match=chem_ok,
                              kd_var=float(np.nanvar(kd)), ent20=ent20, ent5=ent5))
 R = pd.DataFrame(rec_rows)
-R.to_csv(f"{ROOT}/outputs/skempi_if/panel_replication_positions.csv", index=False)
+R.to_csv(f"{ROOT}/outputs/skempi_if/panel_replication_positions{SUF}.csv", index=False)
 
 # models averaged first -> crystal is the independent unit (their corrected design)
 C = R.groupby(["complex", "arm", "group"]).agg(

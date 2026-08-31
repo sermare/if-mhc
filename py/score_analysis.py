@@ -7,20 +7,29 @@ of the four models, predicted affinity. That is the claim under test here.
 ESMCBA's output scale is not documented in the checkpoint, so its direction is
 established empirically against MHCflurry before anything is concluded from it.
 """
+import os
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 ROOT = "/global/scratch/users/sergiomar10/if-mhc"
+# Phase selection: which (dataset, temperature) run to analyse. Defaults to the
+# T=0.1 SKEMPI phase so existing invocations keep working; set SK_DATASET /
+# SK_TEMP to point the same analysis at another phase.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+TAG = "t" + TEMP.replace(".", "")
+SUF = f"_{DATASET}_T{TEMP}"
+
 OUT = f"{ROOT}/outputs/skempi_if"
 
-T = pd.read_csv(f"{OUT}/peptides_to_score.csv")
-mf = pd.read_csv(f"{OUT}/mhcflurry_scores.csv")
-eb = pd.read_csv(f"{OUT}/esmcba_scores.csv")
+T = pd.read_csv(f"{OUT}/peptides_to_score{SUF}.csv")
+mf = pd.read_csv(f"{OUT}/mhcflurry_scores{SUF}.csv")
+eb = pd.read_csv(f"{OUT}/esmcba_scores{SUF}.csv")
 D = (T.merge(mf, on=["seq", "mhcflurry_allele"], how="left")
        .merge(eb, on=["seq", "esmcba_allele"], how="left"))
 D["log_affinity"] = np.log10(D["affinity"])
-D.to_csv(f"{OUT}/designs_scored.csv", index=False)
+D.to_csv(f"{OUT}/designs_scored{SUF}.csv", index=False)
 print(f"joined {len(D):,} (complex,arm,model,peptide) rows; "
       f"mhcflurry missing {D.affinity.isna().sum()}, esmcba missing {D.esmcba_pred.isna().sum()}")
 

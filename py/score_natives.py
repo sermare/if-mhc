@@ -8,7 +8,11 @@ epitope?". This scores the 21 native epitopes with both predictors.
 import os, sys
 import numpy as np, pandas as pd
 ROOT="/global/scratch/users/sergiomar10/if-mhc"
-T=pd.read_csv(f"{ROOT}/outputs/skempi_if/peptides_to_score.csv")
+# Phase selection, matching the other scoring scripts.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+SUF = f"_{DATASET}_T{TEMP}"
+T=pd.read_csv(f"{ROOT}/outputs/skempi_if/peptides_to_score{SUF}.csv")
 nat=T[["complex","native","mhcflurry_allele","esmcba_allele"]].drop_duplicates()
 nat=nat.rename(columns={"native":"seq"})
 print(f"{len(nat)} native epitopes")
@@ -20,7 +24,7 @@ if sys.argv[1]=="mhcflurry":
         r=p.predict(peptides=g.seq.tolist(), alleles=[al], verbose=0)
         r=r[["peptide","affinity","presentation_score"]].rename(columns={"peptide":"seq"})
         r["mhcflurry_allele"]=al; out.append(r)
-    pd.concat(out).to_csv(f"{ROOT}/outputs/skempi_if/native_mhcflurry.csv",index=False)
+    pd.concat(out).to_csv(f"{ROOT}/outputs/skempi_if/native_mhcflurry{SUF}.csv",index=False)
 else:
     sys.path.insert(0,f"{ROOT}/py")
     os.environ.setdefault("HF_HOME","/global/scratch/users/sergiomar10/hf_cache")
@@ -39,5 +43,5 @@ else:
         with torch.no_grad():
             p_,_=m(enc.input_ids,attention_mask=enc.attention_mask,return_embedding=True)
         out.append(pd.DataFrame({"seq":g.seq.tolist(),"esmcba_pred":p_.float().numpy(),"esmcba_allele":al}))
-    pd.concat(out).to_csv(f"{ROOT}/outputs/skempi_if/native_esmcba.csv",index=False)
+    pd.concat(out).to_csv(f"{ROOT}/outputs/skempi_if/native_esmcba{SUF}.csv",index=False)
 print("done")

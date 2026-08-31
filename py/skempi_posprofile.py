@@ -6,16 +6,25 @@ buried middle of the epitope, and their handling of the two chain termini, which
 are unnatural contexts (a free N- and C-terminus sitting inside the MHC groove).
 Splitting recovery by position shows which is which.
 """
+import os
 import collections, glob
 import numpy as np
 import pandas as pd
 
 OUT = "outputs/skempi_if"
+# Phase selection: which (dataset, temperature) run to analyse. Defaults to the
+# T=0.1 SKEMPI phase so existing invocations keep working; set SK_DATASET /
+# SK_TEMP to point the same analysis at another phase.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+TAG = "t" + TEMP.replace(".", "")
+SUF = f"_{DATASET}_T{TEMP}"
+
 MODELS = ["esmif", "proteinmpnn", "proteinmpnn_nomhc", "ligandmpnn"]
 
 rows = []
 for m in MODELS:
-    for f in glob.glob(f"{OUT}/skempi/T0.1/{m}/parts/*.csv"):
+    for f in glob.glob(f"{OUT}/{DATASET}/T{TEMP}/{m}/parts/*.csv"):
         try:
             d = pd.read_csv(f, usecols=["arm", "seq", "native"])
         except Exception:
@@ -29,6 +38,7 @@ df["seq"] = df.seq.astype(str)
 df["native"] = df.native.astype(str)
 df = df[df.native.str.len() == 9]          # the 9-mers: the dominant length class
 
+print(f"PHASE {DATASET}/T{TEMP}")
 print(f"per-position identity to native, 9-mer epitopes only ({len(df):,} designs)\n")
 print(f"{'model / arm':26s} " + " ".join(f"P{i+1:<5d}" for i in range(9)))
 for (m, arm), g in df.groupby(["model", "arm"]):

@@ -16,7 +16,14 @@ import pandas as pd
 from scipy import stats
 
 ROOT = "/global/scratch/users/sergiomar10/if-mhc"
-R = pd.read_csv(f"{ROOT}/outputs/skempi_if/panel_replication_positions.csv")
+# Phase selection: which (dataset, temperature) run to analyse. Defaults to the
+# T=0.1 SKEMPI phase so existing invocations keep working; set SK_DATASET /
+# SK_TEMP to point the same analysis at another phase.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+TAG = "t" + TEMP.replace(".", "")
+SUF = f"_{DATASET}_T{TEMP}"
+R = pd.read_csv(f"{ROOT}/outputs/skempi_if/panel_replication_positions{SUF}.csv")
 man = pd.read_csv(f"{ROOT}/inputs/skempi/manifest.csv")
 CLASS2 = set(man[man.pep_fused_to_mhc == 1]["complex"]) | {"3QIB_ABP_CD", "4OZG_ABJ_GH"}
 
@@ -96,7 +103,7 @@ else:
               f"   -> {'agrees (higher ddG = better recovered)' if (r1>0 and p1<0.05) else 'no significant agreement'}")
         print(f"    ddG vs entropy  : Spearman rho={r2:+.3f} p={p2:.3g}"
               f"   -> {'agrees (higher ddG = lower entropy)' if (r2<0 and p2<0.05) else 'no significant agreement'}")
-        j.to_csv(f"{ROOT}/outputs/skempi_if/skempi_ddg_vs_recovery_{arm}.csv", index=False)
+        j.to_csv(f"{ROOT}/outputs/skempi_if/skempi_ddg_vs_recovery_{arm}{SUF}.csv", index=False)
 
 hdr("FOLLOW-UP 3 -- replicate structures sharing an identical epitope (nb04 design)")
 grp = man.groupby("pep_seq")["complex"].apply(list)

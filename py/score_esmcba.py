@@ -18,6 +18,14 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
 ROOT = "/global/scratch/users/sergiomar10/if-mhc"
+# Phase selection: which (dataset, temperature) run to analyse. Defaults to the
+# T=0.1 SKEMPI phase so existing invocations keep working; set SK_DATASET /
+# SK_TEMP to point the same analysis at another phase.
+DATASET = os.environ.get("SK_DATASET", "skempi")
+TEMP = os.environ.get("SK_TEMP", "0.1")
+TAG = "t" + TEMP.replace(".", "")
+SUF = f"_{DATASET}_T{TEMP}"
+
 os.environ.setdefault("HF_HOME", "/global/scratch/users/sergiomar10/hf_cache")
 from huggingface_hub import hf_hub_download, list_repo_files
 from esm.models.esmc import ESMC
@@ -56,7 +64,7 @@ def resolve_checkpoint(allele, files):
 
 def main():
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    T = pd.read_csv(f"{ROOT}/outputs/skempi_if/peptides_to_score.csv")
+    T = pd.read_csv(f"{ROOT}/outputs/skempi_if/peptides_to_score{SUF}.csv")
     files = list_repo_files(REPO)
     base = ESMC.from_pretrained("esmc_300m").to(dev).eval()
 
@@ -90,12 +98,12 @@ def main():
                              return_embedding=True)
                 preds.append(p.float().cpu()); embs.append(e.float().cpu()); seqs += list(s)
         pr = torch.cat(preds).numpy(); em = torch.cat(embs).numpy()
-        np.save(f"{ROOT}/outputs/skempi_if/esmcba_emb_{allele}.npy", em)
+        np.save(f"{ROOT}/outputs/skempi_if/esmcba_emb_{allele}{SUF}.npy", em)
         out.append(pd.DataFrame({"seq": seqs, "esmcba_pred": pr, "esmcba_allele": allele}))
         print(f"  pred range {pr.min():.3f}..{pr.max():.3f}  mean {pr.mean():.3f}", flush=True)
 
     R = pd.concat(out, ignore_index=True)
-    R.to_csv(f"{ROOT}/outputs/skempi_if/esmcba_scores.csv", index=False)
+    R.to_csv(f"{ROOT}/outputs/skempi_if/esmcba_scores{SUF}.csv", index=False)
     print(f"\nscored {len(R):,} peptides -> outputs/skempi_if/esmcba_scores.csv")
 
 
