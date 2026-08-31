@@ -26,7 +26,7 @@ log "start on ${SLURM_JOB_PARTITION:-?} $(hostname); SPEC=$(basename "$SPEC") OU
 made=0; progress=1
 while [ "$progress" = 1 ] && [ "$made" -lt "$BATCH" ] && [ "$SECONDS" -lt "$DEADLINE" ]; do
   progress=0
-  while IFS=$'\t' read -r x cond style target contig hot extra inpdb; do
+  while IFS=$'\t' read -r x cond style target contig hot extra inpdb ckpt; do
     [ -z "${x:-}" ] && continue
     [ "${target:-0}" -le 0 ] 2>/dev/null && continue
     [ "$made" -ge "$BATCH" ] && break
@@ -34,12 +34,13 @@ while [ "$progress" = 1 ] && [ "$made" -lt "$BATCH" ] && [ "$SECONDS" -lt "$DEAD
     have=$(count_cell "$x" "$cond"); have=${have:-0}
     [ "$have" -ge "$target" ] && continue
     progress=1
-    ipdb="${inpdb:-}"; [ -z "$ipdb" ] && ipdb="$ABS/inputs/focus_6am/${x}_trim.pdb"
+    ipdb="${inpdb:-}"; { [ -z "$ipdb" ] || [ "$ipdb" = "-" ]; } && ipdb="$ABS/inputs/focus_6am/${x}_trim.pdb"
+    ck="${ckpt:-}"; [ -z "$(echo "$ck" | tr -d '[:space:]')" ] && ck="models/Complex_base_ckpt.pt"
     prefix="$PDB/${x}_${cond}_j${JOB}_${ARR}_${made}"
     args=( inference.input_pdb="$ipdb"
            "contigmap.contigs=[$contig]"
            inference.num_designs=1
-           inference.ckpt_override_path=models/Complex_base_ckpt.pt
+           inference.ckpt_override_path="$ck"
            inference.output_prefix="$prefix" )
     [ -n "$(echo "${hot:-}"   | tr -d '[:space:]')" ] && args+=( "ppi.hotspot_res=[$hot]" )
     [ -n "$(echo "${extra:-}" | tr -d '[:space:]')" ] && args+=( ${extra} )
